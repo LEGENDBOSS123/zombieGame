@@ -66,10 +66,6 @@ assetManager.loadAll([
 ]);
 
 
-
-
-
-
 var gameCamera = new CameraTHREEJS({ camera: graphicsEngine.camera, pullback: 5, maxPullback: 20 });
 var cameraControls = new SimpleCameraControls({
     camera: gameCamera,

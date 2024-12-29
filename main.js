@@ -25,7 +25,7 @@ import Stats from "./3D/Web/Stats.mjs"
 import GraphicsEngine from "./3D/Graphics/GraphicsEngine.mjs";
 import ZombieSpawner from "./ZombieSpawner.mjs";
 
-import * as THREE from "three"; 
+import * as THREE from "three";
 import Target from "./Target.mjs";
 import Zombie from "./Zombie.mjs";
 top.Box = Box;

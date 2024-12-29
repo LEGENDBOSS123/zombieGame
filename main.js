@@ -48,14 +48,20 @@ graphicsEngine.setBackgroundImage("3D/Graphics/Textures/autumn_field_puresky_8k.
 graphicsEngine.setSunlightDirection(new Vector3(-2, -8, -5));
 graphicsEngine.setSunlightBrightness(1);
 graphicsEngine.disableAO();
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> da3e335bf7af12987754a289b4bd05f5e4eccec1
 graphicsEngine.renderDistance = 1024;
 graphicsEngine.cameraFar = 2048;
 window.graphicsEngine = graphicsEngine;
 
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> da3e335bf7af12987754a289b4bd05f5e4eccec1
 var assetManager = new AssetManager({
     loader: new THREE.TextureLoader()
 });
@@ -64,8 +70,11 @@ assetManager.loadAll([
     { name: "rug", file: "rug.jpg" },
     { name: "grass", file: "grass.png" },
     { name: "rocky ground", file: "rockyGround.jpg" }
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> da3e335bf7af12987754a289b4bd05f5e4eccec1
 ]);
 
 

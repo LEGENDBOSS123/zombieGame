@@ -1,6 +1,7 @@
 import Sphere from "./3D/Physics/Shapes/Sphere.mjs";
 import HealthUnit from "./HealthUnit.mjs";
 import Vector3 from "./3D/Physics/Math3D/Vector3.mjs";
+import Quaternion from "./3D/Physics/Math3D/Quaternion.mjs";
 var Zombie = class extends HealthUnit {
     constructor(options) {
         super(options);
@@ -50,8 +51,16 @@ var Zombie = class extends HealthUnit {
     }
 
     setMeshAndAddToScene(options, graphicsEngine) {
-        this.sphere.setMesh(options, graphicsEngine);
-        this.sphere.addToScene(graphicsEngine.scene);
+        graphicsEngine.load("slime.glb", function(gltf){
+            gltf.scene.traverse(function (child) {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                }
+            })
+            this.sphere.mesh = gltf.scene;
+            this.addToScene(graphicsEngine.scene);
+        }.bind(this));
     }
 
     findTarget(targets, world) {
@@ -70,14 +79,16 @@ var Zombie = class extends HealthUnit {
         if (!targetBody) {
             return;
         }
-        if(this.jumpCooldown != this.maxJumpCooldown){
-            this.jumpCooldown -= 1;
-            return;
-        }
         var direction = targetBody.global.body.position.subtract(this.sphere.global.body.position);
         direction.y = 0;
         direction.normalizeInPlace().scaleInPlace(this.speed);
         direction.y = this.jumpPower;
+        this.sphere.global.body.rotation = Quaternion.lookAt(direction, new Vector3(0, 1, 0));
+        
+        if(this.jumpCooldown != this.maxJumpCooldown){
+            this.jumpCooldown -= 1;
+            return;
+        }
         this.sphere.applyForce(direction);
         this.jumpCooldown -= 1;
         

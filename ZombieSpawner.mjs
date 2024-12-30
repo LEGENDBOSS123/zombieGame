@@ -23,6 +23,12 @@ var ZombieSpawner = class {
 
     setMeshAndAddToScene(options, graphicsEngine) {
         graphicsEngine.load("zombieSpawner.glb", function (gltf) {
+            gltf.scene.traverse(function (child) {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                }
+            })
             this.sphere.mesh = gltf.scene;
             this.addToScene(graphicsEngine.scene);
         }.bind(this));

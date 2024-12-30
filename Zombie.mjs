@@ -5,7 +5,7 @@ var Zombie = class extends HealthUnit {
     constructor(options) {
         super(options);
         this.damage = options?.damage ?? 10;
-        this.speed = options?.speed ?? 0.6;
+        this.speed = options?.speed ?? 0.3;
         this.fireRate = options?.fireRate ?? 1;
         this.jumpPower = options?.jumpPower ?? 0.1;
         this.maxAmmo = options?.maxAmmo ?? 1;
@@ -14,11 +14,11 @@ var Zombie = class extends HealthUnit {
         this.reloadTime = options?.reloadTime ?? 1;
         this.sphere = new Sphere(options?.sphere);
         this.sphere.radius = 1;
-        this.maxJumpCooldown = options?.maxJumpCooldown ?? 40;
+        this.maxJumpCooldown = options?.maxJumpCooldown ?? 50;
         this.jumpCooldown = options?.jumpCooldown ?? 0;
         this.sphere.setRestitution(0);
-        this.sphere.setFriction(0);
-        this.sphere.global.body.linearDamping = new Vector3(0.05, 0, 0.05)
+        this.sphere.setFriction(0.5);
+        this.sphere.global.body.linearDamping = new Vector3(0.02, 0, 0.02)
         this.sphere.global.body.angularDamping = 1;
         this.sphere.calculateLocalHitbox();
         this.jumpPostCollision = function (contact) {

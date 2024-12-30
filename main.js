@@ -183,6 +183,10 @@ for(var i = 0; i< 1; i++){
     zombies.push(zombieSpawner.spawnZombie(Zombie, world, graphicsEngine));
 }
 
+setInterval(function () {
+    zombies.push(zombieSpawner.spawnZombie(Zombie, world, graphicsEngine));
+}, 5000);
+
 for (var i = 0; i < 1; i++) {
     graphicsEngine.load('ground.glb', function (gltf) {
         gltf.scene.castShadow = true;

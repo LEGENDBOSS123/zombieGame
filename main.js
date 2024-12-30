@@ -28,6 +28,9 @@ import ZombieSpawner from "./ZombieSpawner.mjs";
 import * as THREE from "three";
 import Target from "./Target.mjs";
 import Zombie from "./Zombie.mjs";
+import Ability from "./Ability.mjs";
+
+top.Ability = Ability;
 top.Box = Box;
 top.World = World;
 var stats = new Stats();

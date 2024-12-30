@@ -61,20 +61,20 @@ var World = class {
     }
 
     step() {
-        for(var i = 0; i < this.composites.length; i++){
-            if(this.composites[i].preStepCallback){
-                this.composites[i].preStepCallback();
-            }
-        }
         for (var i = 0; i < this.iterations; i++) {
+            for(var composite of this.composites){
+                if(composite.preStepCallback){
+                    composite.preStepCallback();
+                }
+            }
             this.updateBeforeCollisionAll();
             this.collisionDetector.handleAll(this.composites);
             this.collisionDetector.resolveAll();
             this.updateAfterCollisionAll();
-        }
-        for(var i = 0; i < this.composites.length; i++){
-            if(this.composites[i].postStepCallback){
-                this.composites[i].postStepCallback();
+            for(var composite of this.composites){
+                if(composite.postStepCallback){
+                    composite.postStepCallback();
+                }
             }
         }
     }

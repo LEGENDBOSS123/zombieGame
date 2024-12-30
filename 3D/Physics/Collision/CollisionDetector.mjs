@@ -27,6 +27,7 @@ var CollisionDetector = class {
     }
 
     addPair(shape1, shape2) {
+
         if (!shape1.canCollideWith(shape2)) {
             return;
         }
@@ -38,7 +39,7 @@ var CollisionDetector = class {
             shape1 = shape2;
             shape2 = temp;
         }
-        if (!this.handlers[shape1.shape]?.[shape2.shape]) {
+        if (!(this.handlers[shape1.shape]?.[shape2.shape] || this.handlers[shape2.shape]?.[shape1.shape])) {
             return;
         }
         return this.pairs.set(shape1.id + this.constructor.seperatorCharacter + shape2.id, [shape1, shape2]);
@@ -151,14 +152,14 @@ var CollisionDetector = class {
                 if (key == contact.body1.maxParent.id) {
                     var massRatio2 = contact.body2.maxParent.global.body.mass / totalMass;
                     massRatio2 = isNaN(massRatio2) ? 1 : massRatio2;
-                    if(maxParentMap.get(contact.body1.maxParent.id).penetrationSum != 0) {
+                    if (maxParentMap.get(contact.body1.maxParent.id).penetrationSum != 0) {
                         totalTranslation.addInPlace(translation.scale(contact.penetration.magnitudeSquared() / maxParentMap.get(contact.body1.maxParent.id).penetrationSum * massRatio2));
                     }
                 }
                 else {
                     var massRatio1 = contact.body1.maxParent.global.body.mass / totalMass;
                     massRatio1 = isNaN(massRatio1) ? 1 : massRatio1;
-                    if(maxParentMap.get(contact.body2.maxParent.id).penetrationSum != 0) {
+                    if (maxParentMap.get(contact.body2.maxParent.id).penetrationSum != 0) {
                         totalTranslation.addInPlace(translation.scale(-contact.penetration.magnitudeSquared() / maxParentMap.get(contact.body2.maxParent.id).penetrationSum * massRatio1));
                     }
                 }
@@ -203,109 +204,6 @@ var CollisionDetector = class {
             v.z = dimensions.z;
         }
         return v;
-    }
-
-    timeOfImpactSphereAABB(initialSpherePos, finalSpherePos, sphereRadius,
-        initialAABBMin, initialAABBMax, finalAABBMin, finalAABBMax) {
-
-        let toiMin = 0.0;  // Start of the time interval
-        let toiMax = 1.0;  // End of the time interval
-
-        // Loop over all three axes (x, y, z)
-        for (let i = 0; i < 3; i++) {
-            const sphereInitial = initialSpherePos.toArray()[i];
-            const sphereFinal = finalSpherePos.toArray()[i];
-            const sphereVelocity = sphereFinal - sphereInitial;
-
-            const aabbInitialMin = initialAABBMin.toArray()[i];
-            const aabbInitialMax = initialAABBMax.toArray()[i];
-            const aabbFinalMin = finalAABBMin.toArray()[i];
-            const aabbFinalMax = finalAABBMax.toArray()[i];
-            const aabbVelocityMin = aabbFinalMin - aabbInitialMin;
-            const aabbVelocityMax = aabbFinalMax - aabbInitialMax;
-
-            // Check for stationary sphere relative to AABB on this axis
-            if (sphereVelocity === 0 && aabbVelocityMin === 0 && aabbVelocityMax === 0) {
-                const closestPoint = new Vector3(sphereInitial, sphereInitial, sphereInitial).clamp(initialAABBMin, initialAABBMax);
-                if (initialSpherePos.distance(closestPoint) > sphereRadius) {
-                    return null;  // No collision if distance is greater than radius
-                }
-                continue;
-            }
-
-            // Calculate entry and exit times on this axis
-            let entryTime = -Infinity;
-            let exitTime = Infinity;
-
-            if (sphereVelocity !== 0) {
-                // Moving sphere relative to the AABB
-                const invVelocity = 1.0 / sphereVelocity;
-
-                const entryMin = (aabbInitialMin - sphereInitial - sphereRadius) * invVelocity;
-                const entryMax = (aabbInitialMax - sphereInitial + sphereRadius) * invVelocity;
-
-                entryTime = Math.min(entryMin, entryMax);
-                exitTime = Math.max(entryMin, entryMax);
-            }
-
-            // AABB moving relative to the sphere
-            if (aabbVelocityMin !== 0 || aabbVelocityMax !== 0) {
-                const invVelocityMin = 1.0 / aabbVelocityMin;
-                const invVelocityMax = 1.0 / aabbVelocityMax;
-
-                const aabbEntryMin = (sphereInitial - aabbInitialMax - sphereRadius) * invVelocityMin;
-                const aabbEntryMax = (sphereInitial - aabbInitialMin + sphereRadius) * invVelocityMax;
-
-                entryTime = Math.max(entryTime, Math.min(aabbEntryMin, aabbEntryMax));
-                exitTime = Math.min(exitTime, Math.max(aabbEntryMin, aabbEntryMax));
-            }
-
-            // Update global TOI
-            toiMin = Math.max(toiMin, entryTime);
-            toiMax = Math.min(toiMax, exitTime);
-
-            if (toiMin > toiMax) {
-                return null;  // No collision
-            }
-        }
-
-        // Return the exact time of impact (TOI)
-        return toiMin >= 0 && toiMin <= 1 ? toiMin : null;
-    }
-
-    timeOfImpactSphereBox(sphere1, box1) {
-        var relPos = sphere1.global.body.previousPosition.subtract(box1.global.body.actualPreviousPosition);
-        var relVel = sphere1.global.body.getVelocity().subtract(box1.global.body.getVelocity());
-
-        var localRelPos = box1.global.body.rotation.conjugate().multiplyVector3(relPos);
-        var localRelVel = box1.global.body.rotation.conjugate().multiplyVector3(relVel);
-
-        var halfDims = new Vector3(box1.width, box1.height, box1.depth).scale(0.5);
-
-        var closestPoint = this.getClosestPointToAABB(localRelPos, null, halfDims);
-
-        var toClosest = closestPoint.subtract(localRelPos);
-
-        var A = localRelVel.dot(localRelVel);
-        var B = 2 * localRelVel.dot(toClosest);
-        var C = toClosest.dot(toClosest) - sphere1.radius * sphere1.radius;
-
-        var discriminant = B * B - 4 * A * C;
-
-        if (discriminant < 0) {
-            return null;
-        }
-
-        var t1 = (-B - Math.sqrt(discriminant)) / (2 * A);
-        var t2 = (-B + Math.sqrt(discriminant)) / (2 * A);
-
-        if (t1 >= 0 && t1 <= 1) {
-            return t1;
-        }
-        else if (t2 >= 0 && t2 <= 1) {
-            return t2;
-        }
-        return null;
     }
 
     handleSphereBox(sphere1, box1) {
@@ -358,7 +256,6 @@ var CollisionDetector = class {
                         contactPoint = new Vector3(0, 0, penetrationValues.z);
                     }
                     var contact = new Contact();
-                    //contactPoint = box1.translateLocalToWorld(contactPoint.addInPlace(relativePos));
                     contactPoint = boxPos.add(box1.global.body.rotation.multiplyVector3(contactPoint.addInPlace(relativePos)));
                     contact.normal = spherePos.subtract(contactPoint).normalizeInPlace();
                     contact.point = contactPoint;
@@ -384,21 +281,7 @@ var CollisionDetector = class {
                 contact.body2 = box1;
                 contact.point = sphere1.global.body.position.subtract(contact.normal.scale(sphere1.radius));
                 contact.velocity = sphere1.getVelocityAtPosition(contact.point).subtractInPlace(box1.getVelocityAtPosition(contact.point));
-                //         var normal = pos.subtract(closest).normalize();
-                //         normal.x = Math.round(normal.x);
-                //         normal.y = Math.round(normal.y);
-                //         normal.z = Math.round(normal.z);
 
-                //         contact.point = box1.translateLocalToWorld(closest);
-                //         contact.normal = box1.global.body.rotation.multiplyVector3(normal);
-                //         contact.penetration = contact.normal.scale(sphere1.radius).add(contact.point).subtract(spherePos);
-
-                //         contact.body1 = sphere1;
-                //         contact.body2 = box1;
-                //         contact.point = sphere1.global.body.position.subtract(contact.normal.scale(sphere1.radius));
-                //         contact.velocity = sphere1.getVelocityAtPosition(contact.point).subtractInPlace(box1.getVelocityAtPosition(contact.point));
-                //         this.addContact(contact);
-                //         return true;
                 return contact;
             }
             return distanceSquared - sphere1.radius * sphere1.radius;
@@ -413,8 +296,6 @@ var CollisionDetector = class {
                 maxT = t;
             }
         }
-        // var t3 = this.timeOfImpactSphereAABB(prevPos, relativePos, sphere1.radius * 0, dimensions2.scale(-1), dimensions2, dimensions2.scale(-1), dimensions2);
-        // var t2 = this.timeOfImpactSphereBox(sphere1, box1);
         t = maxT;
         if (t !== null) {
 
@@ -513,7 +394,7 @@ var CollisionDetector = class {
             var sphere2Pos = sphere2.global.body.previousPosition.lerp(sphere2.global.body.position, t);
             var distanceSquared = sphere1Pos.subtract(sphere2Pos).magnitudeSquared();
             if (getData) {
-                if(distanceSquared < sphere1.radius * sphere1.radius){
+                if (distanceSquared < sphere1.radius * sphere1.radius) {
                     return null;
                 }
                 var contact = new Contact();
@@ -547,7 +428,7 @@ var CollisionDetector = class {
             return false;
         }
         var distanceTo = sphere1.global.body.position.distance(sphere2.global.body.position);
-        
+
         var contact = new Contact();
         contact.normal = sphere1.global.body.position.subtract(sphere2.global.body.position).normalizeInPlace();
         if (contact.normal.magnitudeSquared() == 0) {
@@ -740,11 +621,11 @@ var CollisionDetector = class {
         return false;
     }
 
-    toJSON(){
+    toJSON() {
         return {};
     }
 
-    static fromJSON(json, world){
+    static fromJSON(json, world) {
         var collisionDetector = new CollisionDetector({
             world: world
         });

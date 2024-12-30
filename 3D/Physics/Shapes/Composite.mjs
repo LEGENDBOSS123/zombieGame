@@ -48,9 +48,11 @@ var Composite = class {
         this.setLocalFlag(this.constructor.FLAGS.OCCUPIES_SPACE, false);
 
         this.preCollisionCallback = null;
+        this.postCollisionCallback = null;
+        this.preStepCallback = null;
+        this.postStepCallback = null;
 
         this.local.hitbox = new Hitbox3(options?.local?.hitbox);
-        this.meshLinkID = -1;
         this.graphicsEngine = null;
         this._mesh = options?.mesh ?? null;
 

@@ -3,7 +3,7 @@ import Composite from "./3D/Physics/Shapes/Composite.mjs";
 import Vector3 from "./3D/Physics/Math3D/Vector3.mjs";
 var ZombieSpawner = class {
     constructor(options) {
-        this.sphere = new Sphere(options);
+        this.sphere = new Sphere(options?.sphere);
         this.sphere.radius = 15;
         this.sphere.local.body.mass = Infinity;
         this.sphere.calculateLocalHitbox();

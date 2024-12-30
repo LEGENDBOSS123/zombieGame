@@ -5,19 +5,40 @@ var Zombie = class extends HealthUnit {
     constructor(options) {
         super(options);
         this.damage = options?.damage ?? 10;
-        this.speed = options?.speed ?? 0.03;
+        this.speed = options?.speed ?? 0.6;
         this.fireRate = options?.fireRate ?? 1;
+        this.jumpPower = options?.jumpPower ?? 0.1;
         this.maxAmmo = options?.maxAmmo ?? 1;
         this.ammo = options?.ammo ?? this.maxAmmo;
         this.range = options?.range ?? 3;
         this.reloadTime = options?.reloadTime ?? 1;
         this.sphere = new Sphere(options?.sphere);
         this.sphere.radius = 1;
+        this.maxJumpCooldown = options?.maxJumpCooldown ?? 40;
+        this.jumpCooldown = options?.jumpCooldown ?? 0;
         this.sphere.setRestitution(0);
         this.sphere.setFriction(0);
         this.sphere.global.body.linearDamping = new Vector3(0.05, 0, 0.05)
         this.sphere.global.body.angularDamping = 1;
         this.sphere.calculateLocalHitbox();
+        this.jumpPostCollision = function (contact) {
+            if (contact.body1.maxParent == this.sphere) {
+                if (contact.normal.dot(new Vector3(0, 1, 0)) > 0.75) {
+                    if(this.jumpCooldown <= 0){
+                        this.jumpCooldown = this.maxJumpCooldown;
+                    }
+                }
+            }
+            else {
+                if (contact.normal.dot(new Vector3(0, -1, 0)) > 0.75) {
+                    if(this.jumpCooldown <= 0){
+                        this.jumpCooldown = this.maxJumpCooldown;
+                    }
+                }
+            }
+        }.bind(this);
+        this.sphere.postCollisionCallback = this.jumpPostCollision;
+        
     }
 
     addToScene(scene) {
@@ -49,10 +70,16 @@ var Zombie = class extends HealthUnit {
         if (!targetBody) {
             return;
         }
+        if(this.jumpCooldown != this.maxJumpCooldown){
+            this.jumpCooldown -= 1;
+            return;
+        }
         var direction = targetBody.global.body.position.subtract(this.sphere.global.body.position);
         direction.y = 0;
-        direction.normalizeInPlace();
-        this.sphere.applyForce(direction.scale(this.speed));
+        direction.normalizeInPlace().scaleInPlace(this.speed);
+        direction.y = this.jumpPower;
+        this.sphere.applyForce(direction);
+        this.jumpCooldown -= 1;
         
     }
 
@@ -66,6 +93,9 @@ var Zombie = class extends HealthUnit {
         json.range = this.range;
         json.reloadTime = this.reloadTime;
         json.sphere = this.sphere.id;
+        json.jumpCooldown = this.jumpCooldown;
+        json.maxJumpCooldown = this.maxJumpCooldown;
+        json.jumpPower = this.jumpPower;
         return json;
     }
 
@@ -77,13 +107,17 @@ var Zombie = class extends HealthUnit {
         zombie.maxAmmo = json.maxAmmo;
         zombie.ammo = json.ammo;
         zombie.range = json.range;
+        zombie.maxJumpCooldown = json.maxJumpCooldown;
+        zombie.jumpCooldown = json.jumpCooldown;
         zombie.reloadTime = json.reloadTime;
         zombie.sphere = json.sphere;
+        zombie.jumpPower = json.jumpPower;
         return zombie;
     }
 
     updateReferences(world) {
         this.sphere = world.getByID(this.sphere);
+        this.sphere.postCollisionCallback = this.jumpPostCollision;
     }
 }
 

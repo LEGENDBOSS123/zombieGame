@@ -169,18 +169,19 @@ targets.push(new Target({
 
 
 var zombieSpawner = new ZombieSpawner({
-    global: {
-        body: {
-            position: new Vector3(100, 6.3, 0)
+    sphere: {
+        global: {
+            body: {
+                position: new Vector3(40, 6.3, 0)
+            }
         }
     }
 });
 zombieSpawner.addToWorld(world);
 zombieSpawner.setMeshAndAddToScene({}, graphicsEngine);
-for(var i = 0; i< 20; i++){
+for(var i = 0; i< 1; i++){
     zombies.push(zombieSpawner.spawnZombie(Zombie, world, graphicsEngine));
 }
-
 
 for (var i = 0; i < 1; i++) {
     graphicsEngine.load('ground.glb', function (gltf) {
@@ -229,6 +230,7 @@ for (var i = 0; i < 1; i++) {
         player.respawn();
 
     });
+
 }
 
 
@@ -288,11 +290,11 @@ function render() {
         }
         previousWorld = World.fromJSON(structuredClone(world.toJSON()), graphicsEngine);
         //top.world = setWorld(World.fromJSON(structuredClone(world.toJSON()), graphicsEngine));
-        for(var zombie of zombies){
+        for (var zombie of zombies) {
             zombie.update(targets, world);
         }
         world.step();
-        
+
         steps++;
 
         if (cameraControls.movement.up && player.canJump) {

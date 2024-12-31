@@ -2,26 +2,26 @@
 var Ability = class {
     constructor(options) {
         this.name = options?.name ?? "ABILITY";
-        this.key = options?.key ?? null;
         this.holdTimeStamp = options?.holdTimeStamp ?? 0;
         this.holding = options?.holding ?? false;
         this.holdingTimeoutID = options?.holdingIntervalID ?? null;
-        this.maxHoldTime = options?.maxHoldTime ?? 2000;
+        this.maxHoldTime = options?.maxHoldTime ?? 100;
 
         this.document = options.document;
         this.reloadTime = options?.reloadTime ?? 1000;
         this.lastUsedTime = options?.lastUsedTime ?? 0;
 
-        options.document.addEventListener("keydown", this._onKeyDown.bind(this));
+        options.document.addEventListener("mousedown", this._onMouseDown.bind(this));
 
-        options.document.addEventListener("keyup", this._onKeyUp.bind(this));
+        options.document.addEventListener("mouseup", this._onMouseUp.bind(this));
+
+        this.html = null;
+        this.createHTML();
+        this.active = false;
     }
 
-    _onKeyDown(event) {
-        if (this.key == null || event.key != this.key) {
-            return;
-        }
-        if (this.holding || this.lastUsedTime + this.reloadTime > performance.now()) {
+    _onMouseDown(event) {
+        if (!this.active || this.holding || this.lastUsedTime + this.reloadTime > performance.now()) {
             return;
         }
         this.holdTimeStamp = performance.now();
@@ -31,10 +31,7 @@ var Ability = class {
         }.bind(this), this.maxHoldTime);
     }
 
-    _onKeyUp(event) {
-        if (this.key == null || event.key != this.key) {
-            return;
-        }
+    _onMouseUp(event) {
         if (!this.holding || this.lastUsedTime + this.reloadTime > performance.now()) {
             return;
         }
@@ -43,6 +40,9 @@ var Ability = class {
     }
 
     _activate(timeHeld) {
+        if(!this.active){
+            return;
+        }
         this.holding = false;
         this.onActivate(timeHeld);
         this.lastUsedTime = performance.now();
@@ -50,6 +50,34 @@ var Ability = class {
 
     onActivate(timeHeld) {
         console.log("Ability Activated for " + timeHeld + "ms.");
+    }
+
+    createHTML() {
+        //var document = this.document;
+        var container = document.createElement('div');
+        container.style.width = "100%";
+        container.style.height = "100%";
+        container.style.position = 'absolute';
+        container.style.bottom = "0";
+        container.style.textContent = this.name;
+        this.html = container;
+        return container;
+    }
+
+    update(){
+        var ratio = 1;
+        if(this.holding){
+            ratio = (performance.now() - this.holdTimeStamp) / this.maxHoldTime;
+            this.html.style.backgroundColor = 'red';
+        }
+        else{
+            ratio = (performance.now() - this.lastUsedTime) / this.reloadTime;
+            this.html.style.backgroundColor = 'white';
+        }
+        if(ratio > 1){
+            ratio = 1;
+        }
+        this.html.style.height = (ratio*100) + "%";
     }
 }
 

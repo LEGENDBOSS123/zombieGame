@@ -35,15 +35,19 @@ top.Ability = Ability;
 top.Box = Box;
 top.World = World;
 
-
+var ability1 = new Ability({
+    document: document
+});
 var hotbar = new Hotbar({
     document: document,
 });
 
 hotbar.createHTML({
     container: document.getElementById("hotbarContainer"),
-    aspectRatio: 1
+    aspectRatio: 1,
 });
+
+hotbar.addAbility(ability1, 2);
 
 
 var stats = new Stats();
@@ -199,9 +203,9 @@ for(var i = 0; i< 1; i++){
     zombies.push(zombieSpawner.spawnZombie(Zombie, world, graphicsEngine));
 }
 
-setInterval(function () {
-    zombies.push(zombieSpawner.spawnZombie(Zombie, world, graphicsEngine));
-}, 5000);
+// setInterval(function () {
+//     zombies.push(zombieSpawner.spawnZombie(Zombie, world, graphicsEngine));
+// }, 5000);
 
 for (var i = 0; i < 1; i++) {
     graphicsEngine.load('ground.glb', function (gltf) {
@@ -289,6 +293,7 @@ function render() {
     if (keyListener.isHeld("KeyI")) {
         cameraControls.zoomIn();
     }
+    hotbar.update();
     cameraControls.updateZoom();
     var now = performance.now();
     var delta = (now - start) / 1000;
@@ -313,6 +318,7 @@ function render() {
         for (var zombie of zombies) {
             zombie.update(targets, world);
         }
+        
         world.step();
 
         steps++;

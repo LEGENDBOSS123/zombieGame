@@ -29,10 +29,23 @@ import * as THREE from "three";
 import Target from "./Target.mjs";
 import Zombie from "./Zombie.mjs";
 import Ability from "./Ability.mjs";
+import Hotbar from "./Hotbar.mjs";
 
 top.Ability = Ability;
 top.Box = Box;
 top.World = World;
+
+
+var hotbar = new Hotbar({
+    document: document,
+});
+
+hotbar.createHTML({
+    container: document.getElementById("hotbarContainer"),
+    aspectRatio: 1
+});
+
+
 var stats = new Stats();
 stats.showPanel(0);
 document.body.appendChild(stats.dom);

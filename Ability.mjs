@@ -12,31 +12,34 @@ var Ability = class {
         this.reloadTime = options?.reloadTime ?? 1000;
         this.lastUsedTime = options?.lastUsedTime ?? 0;
 
-        options.document.addEventListener("keydown", function (event) {
-            if (this.key == null || event.key != this.key) {
-                return;
-            }
-            if (this.holding || this.lastUsedTime + this.reloadTime > performance.now()) {
-                return;
-            }
-            this.holdTimeStamp = performance.now();
-            this.holding = true;
-            this.holdingTimeoutID = setTimeout(function () {
-                this._activate(this.maxHoldTime);
-            }.bind(this), this.maxHoldTime);
-        }.bind(this));
+        options.document.addEventListener("keydown", this._onKeyDown.bind(this));
 
-        options.document.addEventListener("keyup", function (event) {
-            if (this.key == null || event.key != this.key) {
-                return;
-            }
-            if (!this.holding || this.lastUsedTime + this.reloadTime > performance.now()) {
-                return;
-            }
-            clearTimeout(this.holdingTimeoutID);
-            this._activate(performance.now() - this.holdTimeStamp);
+        options.document.addEventListener("keyup", this._onKeyUp.bind(this));
+    }
 
-        }.bind(this));
+    _onKeyDown(event) {
+        if (this.key == null || event.key != this.key) {
+            return;
+        }
+        if (this.holding || this.lastUsedTime + this.reloadTime > performance.now()) {
+            return;
+        }
+        this.holdTimeStamp = performance.now();
+        this.holding = true;
+        this.holdingTimeoutID = setTimeout(function () {
+            this._activate(this.maxHoldTime);
+        }.bind(this), this.maxHoldTime);
+    }
+
+    _onKeyUp(event) {
+        if (this.key == null || event.key != this.key) {
+            return;
+        }
+        if (!this.holding || this.lastUsedTime + this.reloadTime > performance.now()) {
+            return;
+        }
+        clearTimeout(this.holdingTimeoutID);
+        this._activate(performance.now() - this.holdTimeStamp);
     }
 
     _activate(timeHeld) {

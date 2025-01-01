@@ -18,7 +18,7 @@ var Slime = class extends HealthUnit {
         this.sphere.radius = options?.radius ?? 1;
         this.maxJumpCooldown = options?.maxJumpCooldown ?? 50;
         this.jumpCooldown = options?.jumpCooldown ?? 0;
-        this.sphere.setRestitution(0);
+        this.sphere.setRestitution(1);
         this.sphere.setFriction(0.5);
         this.sphere.global.body.linearDamping = new Vector3(0.02, 0, 0.02)
         this.sphere.global.body.angularDamping = 1;

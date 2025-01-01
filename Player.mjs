@@ -2,6 +2,7 @@ import Composite from "./3D/Physics/Shapes/Composite.mjs";
 import Sphere from "./3D/Physics/Shapes/Sphere.mjs";
 import Vector3 from "./3D/Physics/Math3D/Vector3.mjs";
 import HealthUnit from "./HealthUnit.mjs";
+import Quaternion from "./3D/Physics/Math3D/Quaternion.mjs";
 var Player = class extends HealthUnit {
     constructor(options) {
         super(options);
@@ -29,6 +30,16 @@ var Player = class extends HealthUnit {
                 body: {
                     mass: 1,
                     position: new Vector3(0, 1.5 * (options?.radius ?? 1), 0),
+                }
+            }
+        }));
+
+        this.spheres.push(new Sphere({
+            radius: 0.5 * (options?.radius ?? 1),
+            local: {
+                body: {
+                    mass: 1,
+                    position: new Vector3(0, 3 * (options?.radius ?? 1), 0),
                 }
             }
         }));
@@ -69,8 +80,17 @@ var Player = class extends HealthUnit {
                 }
             }
         }.bind(this);
+        this.postStepCallback = function () {
+            var vel = this.composite.global.body.getVelocity();
+            var velXZ = new Vector3(vel.x, 0, vel.z);
+            if(velXZ.magnitudeSquared() < 0.005){
+                return;
+            }
+            this.composite.global.body.rotation = Quaternion.lookAt(velXZ.normalize(), new Vector3(0, 1, 0));
+        }.bind(this);
         this.spheres[0].postCollisionCallback = this.jumpPostCollision;
         this.spheres[1].postCollisionCallback = this.jumpPostCollision2;
+        this.composite.postStepCallback = this.postStepCallback;
     }
 
     addToScene(scene) {
@@ -89,23 +109,40 @@ var Player = class extends HealthUnit {
 
     setMeshAndAddToScene(options, graphicsEngine) {
 
-        graphicsEngine.load('3D/Graphics/Textures/metal_grate_rusty_1k.gltf/metal_grate_rusty_1k.gltf', function (gltf) {
+        // graphicsEngine.load('3D/Graphics/Textures/metal_grate_rusty_1k.gltf/metal_grate_rusty_1k.gltf', function (gltf) {
+        //     gltf.scene.traverse(function (child) {
+        //         if (child.isMesh) {
+        //             child.castShadow = true;
+        //             child.receiveShadow = true;
+        //         }
+        //     })
+        //     var scaleFactor = 4;
+        //     for (var i = 0; i < this.spheres.length; i++) {
+        //         var e = this.composite.children[i];
+        //         e.mesh = gltf.scene.clone();
+        //         e.mesh.mesh.scale.set(e.radius * scaleFactor, e.radius * scaleFactor, e.radius * scaleFactor);
+        //         e.mesh.mesh.castShadow = true;
+        //         e.mesh.mesh.receiveShadow = true;
+        //     }
+        //     this.addToScene(graphicsEngine.scene);
+        // }.bind(this));
+        graphicsEngine.load("player.glb", function (gltf) {
+            gltf.scene.scale.set(1,1,1);
+            for(var e of gltf.scene.children){
+                e.position.y -= 1;
+            }
             gltf.scene.traverse(function (child) {
                 if (child.isMesh) {
                     child.castShadow = true;
                     child.receiveShadow = true;
                 }
             })
-            var scaleFactor = 4;
-            for (var i = 0; i < this.spheres.length; i++) {
-                var e = this.composite.children[i];
-                e.mesh = gltf.scene.clone();
-                e.mesh.mesh.scale.set(e.radius * scaleFactor, e.radius * scaleFactor, e.radius * scaleFactor);
-                e.mesh.mesh.castShadow = true;
-                e.mesh.mesh.receiveShadow = true;
-            }
+            this.composite.mesh = gltf.scene;
             this.addToScene(graphicsEngine.scene);
         }.bind(this));
+        // this.spheres.forEach(sphere => {
+        //     sphere.setMeshAndAddToScene({}, graphicsEngine);
+        // });
     }
 
     respawn() {
@@ -154,10 +191,11 @@ var Player = class extends HealthUnit {
         }
         this.spheres[0].postCollisionCallback = this.jumpPostCollision;
         this.spheres[1].postCollisionCallback = this.jumpPostCollision2;
+        this.composite.postStepCallback = this.postStepCallback;
     }
 
     getMeshTargetPosition() {
-        return Vector3.from(this.spheres[1]?.mesh?.mesh?.position)
+        return Vector3.from(this.composite?.mesh?.mesh?.position)
     }
 }
 

@@ -202,6 +202,10 @@ ability1.onActivate = function (timeHeld) {
                 body: {
                     position: point,
                     acceleration: new Vector3(0, -0.2, 0),
+                }
+            },
+            local: {
+                body: {
                     mass: 1
                 }
             }
@@ -246,6 +250,10 @@ ability2.onActivate = function (timeHeld) {
                 body: {
                     position: point,
                     acceleration: new Vector3(0, -0.2, 0),
+                }
+            },
+            local: {
+                body: {
                     mass: 1
                 }
             }
@@ -257,6 +265,53 @@ ability2.onActivate = function (timeHeld) {
     top.slimes.push(slime);
 }
 hotbar.addAbility(ability2);
+
+
+
+var ability3 = new Ability({
+    document: document,
+    graphicsEngine: graphicsEngine,
+    world: world,
+    reloadTime: 0
+});
+ability3.onActivate = function (timeHeld) {
+    var intersection = graphicsEngine.raycastFirst();
+    if (!intersection) {
+        return;
+    }
+    // var radius = intersection.distance / 20;
+    var radius = 1;
+    var point = Vector3.from(intersection.point);
+    var normal = Vector3.from(intersection.face.normal);
+    point.addInPlace(normal.scale(radius));
+    var sphere = new Sphere({
+        global: {
+            body: {
+                position: player.composite.global.body.position.add(new Vector3(0, 2, 0)),
+                acceleration: new Vector3(0, -0.2, 0),
+            }
+        },
+        local: {
+            body: {
+                mass: 100
+            }
+        },
+        radius: radius
+    })
+    var direction = point.subtract(sphere.global.body.position);
+    direction.y = 0;
+    direction.normalizeInPlace();
+    var addition = player.composite.global.body.getVelocity();
+    if(addition.dot(direction) < 0){
+        addition = new Vector3(0, 0, 0);
+    }
+    sphere.global.body.setVelocity(direction.scale(0.3).add(addition));
+    sphere.setRestitution(20);
+    sphere.setFriction(1);
+    sphere.addToWorld(this.world);
+    sphere.setMeshAndAddToScene({}, this.graphicsEngine);
+}
+hotbar.addAbility(ability3);
 
 
 

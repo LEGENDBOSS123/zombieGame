@@ -411,6 +411,10 @@ var Composite = class {
         scene.add(this.mesh);
     }
 
+    addToWorld(world) {
+        world.addComposite(this);
+    }
+
     translateChildren(v) {
         for (var i = 0; i < this.children.length; i++) {
             this.children[i].local.body.position.addInPlace(v);

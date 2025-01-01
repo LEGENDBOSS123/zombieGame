@@ -43,7 +43,7 @@ var Sphere = class extends Composite {
     setMesh(options, graphicsEngine) {
         var geometry = options?.geometry ?? new graphicsEngine.THREE.SphereGeometry(this.radius, 32, 32);
         this.setColorGeometry(geometry, graphicsEngine);
-        this.mesh = new graphicsEngine.THREE.Mesh(geometry, options?.material ?? new graphicsEngine.THREE.MeshPhongMaterial({ color: 0x00ff00, wireframe: false }));
+        this.mesh = new graphicsEngine.THREE.Mesh(geometry, options?.material ?? new graphicsEngine.THREE.MeshPhongMaterial({ color: 0x00ff00, wireframe: true }));
     }
 
     setMeshAndAddToScene(options, graphicsEngine) {

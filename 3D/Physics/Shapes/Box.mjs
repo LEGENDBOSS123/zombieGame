@@ -104,6 +104,11 @@ var Box = class extends Composite {
         this.mesh = new graphicsEngine.THREE.Mesh(geometry, options?.material ?? new graphicsEngine.THREE.MeshPhongMaterial({ color: 0x00ff00, wireframe: false }));
     }
 
+    setMeshAndAddToScene(options, graphicsEngine) {
+        this.setMesh(options, graphicsEngine);
+        this.addToScene(graphicsEngine.scene);
+    }
+
     fromMesh(mesh) {
 
         var cubeSize = [Math.abs(mesh.geometry.attributes.position.array[0]), Math.abs(mesh.geometry.attributes.position.array[1]), Math.abs(mesh.geometry.attributes.position.array[2])];

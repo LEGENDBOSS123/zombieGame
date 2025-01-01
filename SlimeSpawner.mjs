@@ -1,7 +1,7 @@
 import Sphere from "./3D/Physics/Shapes/Sphere.mjs";
 import Composite from "./3D/Physics/Shapes/Composite.mjs";
 import Vector3 from "./3D/Physics/Math3D/Vector3.mjs";
-var ZombieSpawner = class {
+var SlimeSpawner = class {
     constructor(options) {
         this.sphere = new Sphere(options?.sphere);
         this.sphere.radius = 15;
@@ -22,7 +22,7 @@ var ZombieSpawner = class {
     }
 
     setMeshAndAddToScene(options, graphicsEngine) {
-        graphicsEngine.load("zombieSpawner.glb", function (gltf) {
+        graphicsEngine.load("slimeSpawner.glb", function (gltf) {
             gltf.scene.traverse(function (child) {
                 if (child.isMesh) {
                     child.castShadow = true;
@@ -41,17 +41,17 @@ var ZombieSpawner = class {
     }
 
     static fromJSON(json, world) {
-        var zombieSpawner = new this();
+        var slimeSpawner = new this();
         this.sphere = json.sphere;
-        return zombieSpawner;
+        return slimeeSpawner;
     }
 
     updateReferences(world) {
         this.sphere = world.getByID(this.sphere);
     }
 
-    spawnZombie(zombieClass, world, graphicsEngine) {
-        var zombie = new zombieClass({
+    spawnSlime(slimeClass, world, graphicsEngine) {
+        var slime = new slimeClass({
             sphere: {
                 global: {
                     body: {
@@ -61,10 +61,10 @@ var ZombieSpawner = class {
                 }
             }
         });
-        zombie.addToWorld(world);
-        zombie.setMeshAndAddToScene({}, graphicsEngine);
-        return zombie;
+        slime.addToWorld(world);
+        slime.setMeshAndAddToScene({}, graphicsEngine);
+        return slime;
     }
 }
 
-export default ZombieSpawner;
+export default SlimeSpawner;

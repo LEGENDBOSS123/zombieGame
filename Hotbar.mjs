@@ -41,12 +41,12 @@ var Hotbar = class {
         if(!slot){
             for (let i = 0; i < this.slotSize; i++) {
                 if(this.slots[i] == null || i == this.activeSlot){
-                    slot = i;
+                    slot = i + 1;
                     break;
                 }
             }
         }
-
+        slot-=1;
         if(this.slots[slot]){
             this.removeAbility(slot);
         }
@@ -107,7 +107,7 @@ var Hotbar = class {
             hotbarNumber.style.zIndex = '1';
             hotbarNumber.innerText = (i + 1).toString();
 
-            var updateSize = function(){
+            const updateSize = function(){
                 var minWH = Math.min(hotbarItemContainer.clientWidth, hotbarItemContainer.clientHeight * aspectRatio);
                 hotbarItem.style.width = minWH + 'px';
             }
@@ -125,16 +125,13 @@ var Hotbar = class {
 
     update() {
         for (let i = 0; i < this.slotSize; i++) {
+            this.hotbarItems[i].style.border = '5px solid gray';
             if(this.slots[i]){
                 this.slots[i].update();
-                this.hotbarItems[i].style.border = '5px solid green';
-            }
-            else{
-                this.hotbarItems[i].style.border = '5px solid gray';
             }
         }
         if(this.activeSlot != null){
-            this.hotbarItems[this.activeSlot].style.border = '5px solid blue';
+            this.hotbarItems[this.activeSlot].style.border = '5px solid lightgreen';
         }
     }
 }

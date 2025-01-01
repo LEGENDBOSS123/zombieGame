@@ -1,3 +1,6 @@
+import Vector3 from "./3D/Physics/Math3D/Vector3.mjs";
+import Sphere from "./3D/Physics/Shapes/Sphere.mjs";
+import Slime from "./Slime.mjs";
 
 var Ability = class {
     constructor(options) {
@@ -5,10 +8,12 @@ var Ability = class {
         this.holdTimeStamp = options?.holdTimeStamp ?? 0;
         this.holding = options?.holding ?? false;
         this.holdingTimeoutID = options?.holdingIntervalID ?? null;
-        this.maxHoldTime = options?.maxHoldTime ?? 100;
+        this.maxHoldTime = options?.maxHoldTime ?? 0;
 
         this.document = options.document;
-        this.reloadTime = options?.reloadTime ?? 1000;
+        this.graphicsEngine = options.graphicsEngine;
+        this.world = options.world;
+        this.reloadTime = options?.reloadTime ?? 0;
         this.lastUsedTime = options?.lastUsedTime ?? 0;
 
         options.document.addEventListener("mousedown", this._onMouseDown.bind(this));
@@ -20,7 +25,7 @@ var Ability = class {
         this.active = false;
     }
 
-    _onMouseDown(event) {
+    _onMouseDown() {
         if (!this.active || this.holding || this.lastUsedTime + this.reloadTime > performance.now()) {
             return;
         }
@@ -31,7 +36,7 @@ var Ability = class {
         }.bind(this), this.maxHoldTime);
     }
 
-    _onMouseUp(event) {
+    _onMouseUp() {
         if (!this.holding || this.lastUsedTime + this.reloadTime > performance.now()) {
             return;
         }

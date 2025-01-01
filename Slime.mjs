@@ -2,7 +2,8 @@ import Sphere from "./3D/Physics/Shapes/Sphere.mjs";
 import HealthUnit from "./HealthUnit.mjs";
 import Vector3 from "./3D/Physics/Math3D/Vector3.mjs";
 import Quaternion from "./3D/Physics/Math3D/Quaternion.mjs";
-var Zombie = class extends HealthUnit {
+
+var Slime = class extends HealthUnit {
     constructor(options) {
         super(options);
         this.damage = options?.damage ?? 10;
@@ -14,7 +15,7 @@ var Zombie = class extends HealthUnit {
         this.range = options?.range ?? 3;
         this.reloadTime = options?.reloadTime ?? 1;
         this.sphere = new Sphere(options?.sphere);
-        this.sphere.radius = 1;
+        this.sphere.radius = options?.radius ?? 1;
         this.maxJumpCooldown = options?.maxJumpCooldown ?? 50;
         this.jumpCooldown = options?.jumpCooldown ?? 0;
         this.sphere.setRestitution(0);
@@ -52,6 +53,7 @@ var Zombie = class extends HealthUnit {
 
     setMeshAndAddToScene(options, graphicsEngine) {
         graphicsEngine.load("slime.glb", function(gltf){
+            gltf.scene.scale.set(this.sphere.radius, this.sphere.radius, this.sphere.radius);
             gltf.scene.traverse(function (child) {
                 if (child.isMesh) {
                     child.castShadow = true;
@@ -111,19 +113,19 @@ var Zombie = class extends HealthUnit {
     }
 
     static fromJSON(json, world) {
-        var zombie = super.fromJSON(json, world);
-        zombie.damage = json.damage;
-        zombie.speed = json.speed;
-        zombie.fireRate = json.fireRate;
-        zombie.maxAmmo = json.maxAmmo;
-        zombie.ammo = json.ammo;
-        zombie.range = json.range;
-        zombie.maxJumpCooldown = json.maxJumpCooldown;
-        zombie.jumpCooldown = json.jumpCooldown;
-        zombie.reloadTime = json.reloadTime;
-        zombie.sphere = json.sphere;
-        zombie.jumpPower = json.jumpPower;
-        return zombie;
+        var slime = super.fromJSON(json, world);
+        slime.damage = json.damage;
+        slime.speed = json.speed;
+        slime.fireRate = json.fireRate;
+        slime.maxAmmo = json.maxAmmo;
+        slime.ammo = json.ammo;
+        slime.range = json.range;
+        slime.maxJumpCooldown = json.maxJumpCooldown;
+        slime.jumpCooldown = json.jumpCooldown;
+        slime.reloadTime = json.reloadTime;
+        slime.sphere = json.sphere;
+        slime.jumpPower = json.jumpPower;
+        return slime;
     }
 
     updateReferences(world) {
@@ -132,4 +134,4 @@ var Zombie = class extends HealthUnit {
     }
 }
 
-export default Zombie;
+export default Slime;

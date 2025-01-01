@@ -3,6 +3,7 @@ import { EffectComposer, RenderPass, ShaderPass, CopyPass, EffectPass, DepthEffe
 import { N8AOPostPass } from './N8AO.mjs';
 import AutoTextureLoader from "./AutoTextureLoader.mjs";
 import MeshLinker from "./MeshLinker.mjs";
+import Vector3 from "../Physics/Math3D/Vector3.mjs";
 
 var GraphicsEngine = class {
     constructor(options) {
@@ -63,6 +64,23 @@ var GraphicsEngine = class {
 
         this.startTime = null;
 
+        this.mousePosition = new Vector3(0, 0, 0);
+        this.raycaster = new THREE.Raycaster();
+
+        this.window.addEventListener("mousemove", function (event) {
+            this.mousePosition.x = (event.clientX / this.screenWidth) * 2 - 1;
+            this.mousePosition.y = -(event.clientY / this.screenHeight) * 2 + 1;
+        }.bind(this));
+
+    }
+
+    raycastFirst(){
+        this.raycaster.setFromCamera(this.mousePosition, this.camera);
+        var intesections = this.raycaster.intersectObjects(this.scene.children, true);
+        if(intesections.length > 0){
+            return intesections[0];
+        }
+        return null;
     }
 
     set cameraFar(far) {

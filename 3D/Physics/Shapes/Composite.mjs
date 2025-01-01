@@ -348,6 +348,10 @@ var Composite = class {
         return null;
     }
 
+    setMeshAndAddToScene(options, graphicsEngine) {
+        return null;
+    }
+
     setColorGeometry(geometry, graphicsEngine) {
         var attrib = geometry.attributes;
         var color = new Float32Array(attrib.position.count * 3);

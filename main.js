@@ -23,11 +23,11 @@ import AssetManager from "./3D/Graphics/AssetManager.mjs"
 
 import Stats from "./3D/Web/Stats.mjs"
 import GraphicsEngine from "./3D/Graphics/GraphicsEngine.mjs";
-import ZombieSpawner from "./ZombieSpawner.mjs";
+import SlimeSpawner from "./SlimeSpawner.mjs";
 
 import * as THREE from "three";
 import Target from "./Target.mjs";
-import Zombie from "./Zombie.mjs";
+import Slime from "./Slime.mjs";
 import Ability from "./Ability.mjs";
 import Hotbar from "./Hotbar.mjs";
 
@@ -35,9 +35,6 @@ top.Ability = Ability;
 top.Box = Box;
 top.World = World;
 
-var ability1 = new Ability({
-    document: document
-});
 var hotbar = new Hotbar({
     document: document,
 });
@@ -46,8 +43,6 @@ hotbar.createHTML({
     container: document.getElementById("hotbarContainer"),
     aspectRatio: 1,
 });
-
-hotbar.addAbility(ability1, 2);
 
 
 var stats = new Stats();
@@ -140,7 +135,7 @@ world.graphicsEngine = graphicsEngine;
 var gravity = -0.2;
 
 var targets = [];
-var zombies = [];
+top.slimes = [];
 
 window.player = new Player({
     radius: 0.5,
@@ -186,9 +181,86 @@ targets.push(new Target({
     threatLevel: Infinity
 }))
 
+var ability1 = new Ability({
+    document: document,
+    graphicsEngine: graphicsEngine,
+    world: world
+});
+ability1.onActivate = function (timeHeld) {
+    var intersection = graphicsEngine.raycastFirst();
+    if (!intersection) {
+        return;
+    }
+    // var radius = intersection.distance / 20;
+    var radius = 1
+    var point = Vector3.from(intersection.point);
+    var normal = Vector3.from(intersection.face.normal);
+    point.addInPlace(normal.scale(radius));
+    var slime = new Slime({
+        sphere: {
+            global: {
+                body: {
+                    position: point,
+                    acceleration: new Vector3(0, -0.2, 0),
+                    mass: 1
+                }
+            }
+        }
+    })
+    var sphere = new Sphere({
+        global: {
+            body: {
+                position: point,
+                acceleration: new Vector3(0, -0.2, 0),
+            }
+        },
+        radius: radius,
+    });
+    // slime.setRestitution(0);
+    // slime.setFriction(0.5);
+    slime.addToWorld(this.world);
+    slime.setMeshAndAddToScene({}, this.graphicsEngine);
+    top.slimes.push(slime);
+}
+hotbar.addAbility(ability1, 1);
 
 
-var zombieSpawner = new ZombieSpawner({
+var ability2 = new Ability({
+    document: document,
+    graphicsEngine: graphicsEngine,
+    world: world
+});
+ability2.onActivate = function (timeHeld) {
+    var intersection = graphicsEngine.raycastFirst();
+    if (!intersection) {
+        return;
+    }
+    // var radius = intersection.distance / 20;
+    var radius = 10;
+    var point = Vector3.from(intersection.point);
+    var normal = Vector3.from(intersection.face.normal);
+    point.addInPlace(normal.scale(radius));
+    var slime = new Slime({
+        sphere: {
+            global: {
+                body: {
+                    position: point,
+                    acceleration: new Vector3(0, -0.2, 0),
+                    mass: 1
+                }
+            }
+        },
+        radius: radius
+    })
+    slime.addToWorld(this.world);
+    slime.setMeshAndAddToScene({}, this.graphicsEngine);
+    top.slimes.push(slime);
+}
+hotbar.addAbility(ability2);
+
+
+
+var slimeSpawner = new SlimeSpawner({
     sphere: {
         global: {
             body: {
@@ -197,10 +269,9 @@ var zombieSpawner = new ZombieSpawner({
         }
     }
 });
-zombieSpawner.addToWorld(world);
-zombieSpawner.setMeshAndAddToScene({}, graphicsEngine);
-for(var i = 0; i< 1; i++){
-    zombies.push(zombieSpawner.spawnZombie(Zombie, world, graphicsEngine));
+slimeSpawner.setMeshAndAddToScene({}, graphicsEngine);
+for (var i = 0; i < 1; i++) {
+    slimes.push(slimeSpawner.spawnSlime(Slime, world, graphicsEngine));
 }
 
 // setInterval(function () {
@@ -315,10 +386,10 @@ function render() {
         }
         previousWorld = World.fromJSON(structuredClone(world.toJSON()), graphicsEngine);
         //top.world = setWorld(World.fromJSON(structuredClone(world.toJSON()), graphicsEngine));
-        for (var zombie of zombies) {
-            zombie.update(targets, world);
+        for (var slime of slimes) {
+            slime.update(targets, world);
         }
-        
+
         world.step();
 
         steps++;

@@ -293,7 +293,7 @@ ability3.onActivate = function (timeHeld) {
         },
         local: {
             body: {
-                mass: 100
+                mass: 1000
             }
         },
         radius: radius
@@ -306,16 +306,19 @@ ability3.onActivate = function (timeHeld) {
         addition = new Vector3(0, 0, 0);
     }
     sphere.global.body.setVelocity(direction.scale(0.3).add(addition));
-    sphere.setRestitution(20);
+    sphere.setRestitution(5);
     sphere.setFriction(1);
     sphere.addToWorld(this.world);
+    sphere.postCollisionCallback = function (contact) {
+        //sphere.toBeRemoved = true;
+    }
     sphere.setMeshAndAddToScene({}, this.graphicsEngine);
 }
 hotbar.addAbility(ability3);
 
 
 
-var slimeSpawner = new SlimeSpawner({
+top.slimeSpawner = new SlimeSpawner({
     sphere: {
         global: {
             body: {
@@ -325,13 +328,14 @@ var slimeSpawner = new SlimeSpawner({
     }
 });
 slimeSpawner.setMeshAndAddToScene({}, graphicsEngine);
+slimeSpawner.addToWorld(world);
 for (var i = 0; i < 1; i++) {
     slimes.push(slimeSpawner.spawnSlime(Slime, world, graphicsEngine));
 }
 
-// setInterval(function () {
-//     zombies.push(zombieSpawner.spawnZombie(Zombie, world, graphicsEngine));
-// }, 5000);
+setInterval(function () {
+    slimes.push(slimeSpawner.spawnSlime(Slime, world, graphicsEngine));
+}, 5000);
 
 for (var i = 0; i < 1; i++) {
     graphicsEngine.load('ground.glb', function (gltf) {
@@ -427,20 +431,10 @@ function render() {
 
     for (var i = 0; i < Math.floor(steps2 - steps); i++) {
 
-        for (var child of world.composites) {
-            if (!child.previousPosition) {
-                child.previousPosition = child.global.body.position.copy();
-                child.previousRotation = child.global.body.rotation.copy();
-            }
-
-            child.previousPosition = child.global.body.position.copy();
-            child.previousRotation = child.global.body.rotation.copy();
-        }
         if (player.composite.global.body.position.y < -30) {
-            //respawn();
+            respawn();
         }
         previousWorld = World.fromJSON(structuredClone(world.toJSON()), graphicsEngine);
-        //top.world = setWorld(World.fromJSON(structuredClone(world.toJSON()), graphicsEngine));
         for (var slime of slimes) {
             slime.update(targets, world);
         }
@@ -465,22 +459,10 @@ function render() {
 
     }
     var lerpAmount = (delta * fps - steps);
-    for (var child of world.composites) {
-        if (!child.previousPosition) {
-            child.previousPosition = child.global.body.position.copy();
-            child.previousRotation = child.global.body.rotation.copy();
-        }
-        if (child.mesh) {
-            child.mesh.mesh.position.set(...child.previousPosition.lerp(child.global.body.position, lerpAmount));
-            child.mesh.mesh.quaternion.slerpQuaternions(child.previousRotation, new THREE.Quaternion().copy(child.global.body.rotation), lerpAmount);
-        }
-    }
-
 
 
     graphicsEngine.update(previousWorld || world, world, lerpAmount);
     gameCamera.update(player.getMeshTargetPosition());
-    //gameCamera.update(player.composite.previousPosition.lerp(player.composite.global.body.position, lerpAmount));
     graphicsEngine.render();
     requestAnimationFrame(render);
 

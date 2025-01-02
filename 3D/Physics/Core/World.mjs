@@ -13,7 +13,6 @@ var World = class {
 
         this.all = options?.all ?? {};
 
-        this.composites = options?.composites ?? [];
         this.spatialHash = options?.spatialHash ?? new SpatialHash({ world: this });
         this.collisionDetector = options?.collisionDetector ?? new CollisionDetector({ world: this });
         this.graphicsEngine = options?.graphicsEngine ?? null;
@@ -32,7 +31,6 @@ var World = class {
 
     addComposite(composite) {
         this.add(composite);
-        this.composites.push(composite);
     }
 
     add(element) {
@@ -44,37 +42,43 @@ var World = class {
         return element;
     }
 
-    updateBeforeCollisionAll() {
-        for (var i = 0; i < this.composites.length; i++) {
-            if (this.composites[i].isMaxParent()) {
-                this.composites[i].updateBeforeCollisionAll();
-            }
-        }
-    }
-
-    updateAfterCollisionAll() {
-        for (var i = 0; i < this.composites.length; i++) {
-            if (this.composites[i].isMaxParent()) {
-                this.composites[i].updateAfterCollisionAll();
-            }
-        }
+    remove(element) {
+        this.spatialHash.remove(element.id);
+        delete this.all[element.id];
     }
 
     step() {
-        for (var i = 0; i < this.iterations; i++) {
-            for(var composite of this.composites){
-                if(composite.preStepCallback){
-                    composite.preStepCallback();
+        for(var i in this.all){
+            if(this.all[i].preStepCallback){
+                this.all[i].preStepCallback();
+            }
+        }
+        for (var iter = 0; iter < this.iterations; iter++) {
+            for (var i in this.all) {
+                if(this.all[i].preIterationCallback){
+                    this.all[i].preIterationCallback();
+                }
+                if (this.all[i].isMaxParent()) {
+                    this.all[i].updateBeforeCollisionAll();
                 }
             }
-            this.updateBeforeCollisionAll();
-            this.collisionDetector.handleAll(this.composites);
+            this.collisionDetector.handleAll(Object.values(this.all));
             this.collisionDetector.resolveAll();
-            this.updateAfterCollisionAll();
-            for(var composite of this.composites){
-                if(composite.postStepCallback){
-                    composite.postStepCallback();
+            for (var i in this.all) {
+                if (this.all[i].isMaxParent()) {
+                    this.all[i].updateAfterCollisionAll();
                 }
+                if(this.all[i].postIterationCallback){
+                    this.all[i].postIterationCallback();
+                }
+            }
+        }
+        for(var i in this.all){
+            if(this.all[i].postStepCallback){
+                this.all[i].postStepCallback();
+            }
+            if(this.all[i].toBeRemoved){
+                this.remove(this.all[i]);
             }
         }
     }
@@ -91,16 +95,12 @@ var World = class {
         world.deltaTimeSquared = this.deltaTimeSquared;
         world.inverseDeltaTime = this.inverseDeltaTime;
         world.iterations = this.iterations;
-        world.all = [];
+        world.all = {};
 
         for (var i in this.all) {
-            world.all.push(this.getByID(i).toJSON());
+            world.all[i]  =this.getByID(i).toJSON();
         }
 
-        world.composites = [];
-        for (var i = 0; i < this.composites.length; i++) {
-            world.composites.push(this.composites[i].id);
-        }
 
         world.spatialHash = null;//this.spatialHash.toJSON();
         world.collisionDetector = this.collisionDetector.toJSON();
@@ -124,11 +124,6 @@ var World = class {
 
         for (var i in world.all) {
             world.all[i].updateReferences(world, graphicsEngine);
-        }
-
-        world.composites = [];
-        for (var i in json.composites) {
-            world.composites.push(world.getByID(json.composites[i]));
         }
 
         world.spatialHash = new SpatialHash({ world: world });//SpatialHash.fromJSON(json.spatialHash, world);

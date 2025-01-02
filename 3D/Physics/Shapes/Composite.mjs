@@ -51,6 +51,9 @@ var Composite = class {
         this.postCollisionCallback = null;
         this.preStepCallback = null;
         this.postStepCallback = null;
+        this.preIterationCallback = null;
+        this.postIterationCallback = null;
+        this.toBeRemoved = false;
 
         this.local.hitbox = new Hitbox3(options?.local?.hitbox);
         this.graphicsEngine = null;
@@ -440,6 +443,7 @@ var Composite = class {
         for (var i of this.children) {
             composite.children.push(i.id);
         }
+        composite.toBeRemoved = this.toBeRemoved;
         composite.material = this.material.toJSON();
         composite.global = {};
         composite.global.body = this.global.body.toJSON();
@@ -463,6 +467,7 @@ var Composite = class {
         for (var i of json.children) {
             composite.children.push(i);
         }
+        composite.toBeRemoved = json.toBeRemoved;
         composite.material = Material.fromJSON(json.material, world);
         composite.global.body = PhysicsBody3.fromJSON(json.global.body, world);
         composite.global.hitbox = Hitbox3.fromJSON(json.global.hitbox);

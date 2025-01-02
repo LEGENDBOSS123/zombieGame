@@ -1,7 +1,6 @@
 
 var MeshLinker = class {
     constructor() {
-        this.maxID = 0;
         this.meshes = {};
     }
     addMesh(id, mesh) {
@@ -22,10 +21,12 @@ var MeshLinker = class {
     }
     update(previousWorld, world, lerpAmount){
         for(var meshID in this.meshes){
+            var mesh = this.meshes[meshID];
             if(!world.getByID(meshID) || !previousWorld.getByID(meshID)){
+                mesh.mesh.visible = false;
                 continue;
             }
-            var mesh = this.meshes[meshID];
+            mesh.mesh.visible = true;
             var composite = world.getByID(meshID);
             var previousComposite = previousWorld.getByID(meshID);
             mesh.mesh.position.set(...previousComposite.global.body.position.lerp(composite.global.body.position, lerpAmount));

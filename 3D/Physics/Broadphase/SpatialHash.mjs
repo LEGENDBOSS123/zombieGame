@@ -29,6 +29,11 @@ var SpatialHash = class {
         return cellPos.x + this.constructor.seperatorCharacter + cellPos.y + this.constructor.seperatorCharacter + cellPos.z;
     }
 
+    remove(id){
+        this.removeHitbox(id);
+        delete this.ids[id];
+    }
+    
     getCellPosition(v, hash) {
         return new Vector3(Math.floor(v.x * hash.inverseGridSize), Math.floor(v.y * hash.inverseGridSize), Math.floor(v.z * hash.inverseGridSize));
     }

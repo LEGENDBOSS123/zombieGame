@@ -432,7 +432,7 @@ function render() {
     for (var i = 0; i < Math.floor(steps2 - steps); i++) {
 
         if (player.composite.global.body.position.y < -30) {
-            respawn();
+            player.respawn();
         }
         previousWorld = World.fromJSON(structuredClone(world.toJSON()), graphicsEngine);
         for (var slime of slimes) {

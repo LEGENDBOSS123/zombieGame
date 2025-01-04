@@ -47,18 +47,40 @@ var Composite = class {
         this.local.flags = options?.local?.flags ?? 0;
         this.setLocalFlag(this.constructor.FLAGS.OCCUPIES_SPACE, false);
 
-        this.preCollisionCallback = null;
-        this.postCollisionCallback = null;
-        this.preStepCallback = null;
-        this.postStepCallback = null;
-        this.preIterationCallback = null;
-        this.postIterationCallback = null;
+        this.events = {};
         this.toBeRemoved = false;
 
         this.local.hitbox = new Hitbox3(options?.local?.hitbox);
         this.graphicsEngine = null;
         this._mesh = options?.mesh ?? null;
 
+    }
+
+    addEventListener(event, callback) {
+        if (!this.events[event]) {
+            this.events[event] = [];
+        }
+        this.events[event].push(callback);
+    }
+
+    removeEventListener(event, callback) {
+        if (!this.events[event]) {
+            return;
+        }
+        var index = this.events[event].indexOf(callback);
+        if (index == -1) {
+            return;
+        }
+        this.events[event].splice(index, 1);
+    }
+
+    dispatchEvent(event, args = []) {
+        if (!this.events[event]) {
+            return;
+        }
+        for (var listener in this.events[event]) {
+            this.events[event][listener](...args);
+        }
     }
 
     setRestitution(restitution) {

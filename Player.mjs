@@ -88,9 +88,9 @@ var Player = class extends HealthUnit {
             }
             this.composite.global.body.rotation = Quaternion.lookAt(velXZ.normalize(), new Vector3(0, 1, 0));
         }.bind(this);
-        this.spheres[0].postCollisionCallback = this.jumpPostCollision;
-        this.spheres[1].postCollisionCallback = this.jumpPostCollision2;
-        this.composite.postStepCallback = this.postStepCallback;
+        this.spheres[0].addEventListener("postCollision", this.jumpPostCollision);
+        this.spheres[1].addEventListener("postCollision", this.jumpPostCollision2);
+        this.composite.addEventListener("postStep", this.postStepCallback);
     }
 
     addToScene(scene) {
@@ -189,9 +189,9 @@ var Player = class extends HealthUnit {
         for (var i = 0; i < this.spheres.length; i++) {
             this.spheres[i] = world.getByID(this.spheres[i]);
         }
-        this.spheres[0].postCollisionCallback = this.jumpPostCollision;
-        this.spheres[1].postCollisionCallback = this.jumpPostCollision2;
-        this.composite.postStepCallback = this.postStepCallback;
+        this.spheres[0].addEventListener("postCollision", this.jumpPostCollision);
+        this.spheres[1].addEventListener("postCollision", this.jumpPostCollision2);
+        this.composite.addEventListener("postStep", this.postStepCallback);
     }
 
     getMeshTargetPosition() {

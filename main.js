@@ -309,9 +309,9 @@ ability3.onActivate = function (timeHeld) {
     sphere.setRestitution(5);
     sphere.setFriction(1);
     sphere.addToWorld(this.world);
-    sphere.postCollisionCallback = function (contact) {
+    sphere.addEventListener("postCollision", function (contact) {
         //sphere.toBeRemoved = true;
-    }
+    });
     sphere.setMeshAndAddToScene({}, this.graphicsEngine);
 }
 hotbar.addAbility(ability3);
@@ -365,7 +365,7 @@ for (var i = 0; i < 1; i++) {
                             player.spawnPoint = Vector3.fromJSON(JSON.parse(localStorage["spawnPoint"]));
                         }
                     }
-                    box.postCollisionCallback = function (contact) {
+                    box.addEventListener("postCollision", function (contact) {
                         if (contact.body1.maxParent == player) {
                             player.spawnPoint = contact.body2.global.body.position;
                             localStorage["spawnPoint"] = JSON.stringify(player.spawnPoint.toJSON());
@@ -374,7 +374,7 @@ for (var i = 0; i < 1; i++) {
                             player.spawnPoint = contact.body1.global.body.position;
                             localStorage["spawnPoint"] = JSON.stringify(player.spawnPoint.toJSON());
                         }
-                    }
+                    });
                 }
                 graphicsEngine.addToScene(box.mesh.mesh);
             }

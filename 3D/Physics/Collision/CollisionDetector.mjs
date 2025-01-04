@@ -124,17 +124,13 @@ var CollisionDetector = class {
                 var contact = value.contacts[i];
                 contact.solve();
                 if (key == contact.body1.maxParent.id) {
-                    if (contact.body1.preCollisionCallback) {
-                        contact.body1.preCollisionCallback(contact);
-                    }
+                    contact.body1.dispatchEvent("preCollision", [contact]);
                     if (maxParentMap.get(contact.body1.maxParent.id).penetrationSum != 0) {
                         contact.body1.maxParent.applyForce(contact.impulse.scale(contact.penetration.magnitudeSquared() / maxParentMap.get(contact.body1.maxParent.id).penetrationSum), contact.point);
                     }
                 }
                 else {
-                    if (contact.body2.preCollisionCallback) {
-                        contact.body2.preCollisionCallback(contact);
-                    }
+                    contact.body2.dispatchEvent("preCollision", [contact]);
                     if (maxParentMap.get(contact.body2.maxParent.id).penetrationSum != 0) {
                         contact.body2.maxParent.applyForce(contact.impulse.scale(-contact.penetration.magnitudeSquared() / maxParentMap.get(contact.body2.maxParent.id).penetrationSum), contact.point);
                     }
@@ -176,8 +172,8 @@ var CollisionDetector = class {
         for (var [key, value] of maxParentMap) {
             for (var i = 0; i < value.contacts.length; i++) {
                 var contact = value.contacts[i];
-                contact.body1.postCollisionCallback?.(contact);
-                contact.body2.postCollisionCallback?.(contact);
+                contact.body1.dispatchEvent("postCollision", [contact]);
+                contact.body2.dispatchEvent("postCollision", [contact]);
             }
         }
         this.contacts.length = 0;

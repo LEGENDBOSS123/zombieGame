@@ -49,15 +49,11 @@ var World = class {
 
     step() {
         for(var i in this.all){
-            if(this.all[i].preStepCallback){
-                this.all[i].preStepCallback();
-            }
+            this.all[i].dispatchEvent("preStep");
         }
         for (var iter = 0; iter < this.iterations; iter++) {
             for (var i in this.all) {
-                if(this.all[i].preIterationCallback){
-                    this.all[i].preIterationCallback();
-                }
+                this.all[i].dispatchEvent("preIteration");
                 if (this.all[i].isMaxParent()) {
                     this.all[i].updateBeforeCollisionAll();
                 }
@@ -68,16 +64,13 @@ var World = class {
                 if (this.all[i].isMaxParent()) {
                     this.all[i].updateAfterCollisionAll();
                 }
-                if(this.all[i].postIterationCallback){
-                    this.all[i].postIterationCallback();
-                }
+                this.all[i].dispatchEvent("postIteration");
             }
         }
         for(var i in this.all){
-            if(this.all[i].postStepCallback){
-                this.all[i].postStepCallback();
-            }
+            this.all[i].dispatchEvent("postStep");
             if(this.all[i].toBeRemoved){
+                this.all[i].dispatchEvent("delete");
                 this.remove(this.all[i]);
             }
         }

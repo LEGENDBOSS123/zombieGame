@@ -39,7 +39,7 @@ var Slime = class extends HealthUnit {
                 }
             }
         }.bind(this);
-        this.sphere.postCollisionCallback = this.jumpPostCollision;
+        this.sphere.addEventListener("postCollision", this.jumpPostCollision);
         
     }
 
@@ -130,7 +130,7 @@ var Slime = class extends HealthUnit {
 
     updateReferences(world) {
         this.sphere = world.getByID(this.sphere);
-        this.sphere.postCollisionCallback = this.jumpPostCollision;
+        this.sphere.addEventListener("postCollision", this.jumpPostCollision);
     }
 }
 

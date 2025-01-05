@@ -44,7 +44,7 @@ var GraphicsEngine = class {
         this.scene.add(this.camera);
 
         this.textureLoader = new AutoTextureLoader();
-        this.mixer = THREE.AnimationMixer;
+        this.mixers = [];
         this.composer = new EffectComposer(this.renderer);
         this.renderPass = new RenderPass(this.scene, this.camera);
         this.renderPass.renderToScreen = false;
@@ -109,8 +109,8 @@ var GraphicsEngine = class {
         this.meshLinker.update(previousWorld, world, lerpAmount);
     }
     render() {
-        if(top.mixer){
-            top.mixer.update(0.01);
+        for(var mixer of this.mixers){
+            mixer.update(16/1000)
         }
         this.sunlight.position.copy(this.camera.position);
         this.sunlight.position.sub(this.sunlight.direction.clone().multiplyScalar(this.sunlight.shadow.camera.far * 0.5));
@@ -121,11 +121,12 @@ var GraphicsEngine = class {
     }
 
     createAnimations(model, animations){
-        var mixer = new this.mixer(model);
+        var mixer = new this.THREE.AnimationMixer(model);
         var actions = [];
         for(var animation of animations){
             actions.push(mixer.clipAction(animation));
         }
+        this.mixers.push(mixer);
         return {
             mixer: mixer,
             actions: actions

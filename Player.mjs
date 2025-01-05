@@ -15,7 +15,7 @@ var Player = class extends HealthUnit {
         this.composite = new Composite(options);
         this.spheres = [];
         this.spheres.push(new Sphere({
-            radius: 0.5 * (options?.radius ?? 1),
+            radius: (options?.radius ?? 1),
             local: {
                 body: {
                     mass: 1,
@@ -25,21 +25,21 @@ var Player = class extends HealthUnit {
         }));
 
         this.spheres.push(new Sphere({
-            radius: options?.radius ?? 1,
+            radius: 0.65 * (options?.radius ?? 1),
             local: {
                 body: {
                     mass: 1,
-                    position: new Vector3(0, 1.5 * (options?.radius ?? 1), 0),
+                    position: new Vector3(0, 2 * (options?.radius ?? 1), 0),
                 }
             }
         }));
 
         this.spheres.push(new Sphere({
-            radius: 0.5 * (options?.radius ?? 1),
+            radius: 0.75 * (options?.radius ?? 1),
             local: {
                 body: {
                     mass: 1,
-                    position: new Vector3(0, 3 * (options?.radius ?? 1), 0),
+                    position: new Vector3(0, 1 * (options?.radius ?? 1), 0),
                 }
             }
         }));
@@ -68,28 +68,24 @@ var Player = class extends HealthUnit {
                 }
             }
         }.bind(this);
-        this.jumpPostCollision2 = function (contact) {
-            if (contact.body1.maxParent == this.composite) {
-                if (contact.normal.dot(new Vector3(0, 1, 0)) > 0.5) {
-                    this.canJump = true;
-                }
-            }
-            else {
-                if (contact.normal.dot(new Vector3(0, -1, 0)) > 0.5) {
-                    this.canJump = true;
-                }
-            }
-        }.bind(this);
+        
         this.postStepCallback = function () {
             var vel = this.composite.global.body.getVelocity();
             var velXZ = new Vector3(vel.x, 0, vel.z);
             if(velXZ.magnitudeSquared() < 0.005){
+                if(this.composite.mesh){
+                    this.composite.mesh.animations.actions[0].weight = 0;
+                }
                 return;
             }
+            if(this.composite.mesh){
+                this.composite.mesh.animations.actions[0].weight = 1;
+                this.composite.mesh.animations.actions[0].timeScale = velXZ.magnitude() * 5;
+            }
             this.composite.global.body.rotation = Quaternion.lookAt(velXZ.normalize(), new Vector3(0, 1, 0));
+            
         }.bind(this);
         this.spheres[0].addEventListener("postCollision", this.jumpPostCollision);
-        this.spheres[1].addEventListener("postCollision", this.jumpPostCollision2);
         this.composite.addEventListener("postStep", this.postStepCallback);
     }
 
@@ -109,25 +105,8 @@ var Player = class extends HealthUnit {
 
     setMeshAndAddToScene(options, graphicsEngine) {
 
-        // graphicsEngine.load('3D/Graphics/Textures/metal_grate_rusty_1k.gltf/metal_grate_rusty_1k.gltf', function (gltf) {
-        //     gltf.scene.traverse(function (child) {
-        //         if (child.isMesh) {
-        //             child.castShadow = true;
-        //             child.receiveShadow = true;
-        //         }
-        //     })
-        //     var scaleFactor = 4;
-        //     for (var i = 0; i < this.spheres.length; i++) {
-        //         var e = this.composite.children[i];
-        //         e.mesh = gltf.scene.clone();
-        //         e.mesh.mesh.scale.set(e.radius * scaleFactor, e.radius * scaleFactor, e.radius * scaleFactor);
-        //         e.mesh.mesh.castShadow = true;
-        //         e.mesh.mesh.receiveShadow = true;
-        //     }
-        //     this.addToScene(graphicsEngine.scene);
-        // }.bind(this));
         graphicsEngine.load("player2.glb", function (gltf) {
-            gltf.scene.scale.set(0.01,0.01,0.01);
+            gltf.scene.scale.set(...(new Vector3(0.02, 0.02, 0.02).scale(this.spheres[0].radius)));
             top.gltf = gltf;
             for(var e of gltf.scene.children){
                 e.position.y -= 100;
@@ -138,7 +117,9 @@ var Player = class extends HealthUnit {
                     child.receiveShadow = true;
                 }
             })
-            this.composite.mesh = graphicsEngine.meshLinker.createMeshData(gltf.scene, graphicsEngine.createAnimations(gltf.scene, gltf.animations));
+            var meshData = graphicsEngine.meshLinker.createMeshData(gltf.scene, graphicsEngine.createAnimations(gltf.scene, gltf.animations));
+            this.composite.mesh = meshData;
+            meshData.animations.actions[0].play();
             this.addToScene(graphicsEngine.scene);
         }.bind(this));
         // this.spheres.forEach(sphere => {
@@ -191,7 +172,6 @@ var Player = class extends HealthUnit {
             this.spheres[i] = world.getByID(this.spheres[i]);
         }
         this.spheres[0].addEventListener("postCollision", this.jumpPostCollision);
-        this.spheres[1].addEventListener("postCollision", this.jumpPostCollision2);
         this.composite.addEventListener("postStep", this.postStepCallback);
     }
 

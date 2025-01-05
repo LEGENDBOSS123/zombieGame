@@ -138,8 +138,8 @@ var targets = [];
 top.slimes = [];
 
 window.player = new Player({
-    radius: 0.5,
-    moveStrength: new Vector3(0.3, 0.05, 0.3),
+    radius: 1,
+    moveStrength: new Vector3(0.2, 0.05, 0.2),
     jumpStrength: 0.75,
     global: {
         body: {
@@ -334,7 +334,7 @@ for (var i = 0; i < 1; i++) {
 }
 
 setInterval(function () {
-    if(slimes.length > 500){
+    if(slimes.length > 20){
         return;
     }
     slimes.push(slimeSpawner.spawnSlime(Slime, world, graphicsEngine));

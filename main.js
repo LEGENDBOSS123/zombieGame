@@ -334,8 +334,11 @@ for (var i = 0; i < 1; i++) {
 }
 
 setInterval(function () {
+    if(slimes.length > 500){
+        return;
+    }
     slimes.push(slimeSpawner.spawnSlime(Slime, world, graphicsEngine));
-}, 5000);
+}, 1);
 
 for (var i = 0; i < 1; i++) {
     graphicsEngine.load('ground.glb', function (gltf) {

@@ -2,7 +2,7 @@ import Vector3 from "../Math3D/Vector3.mjs";
 import Hitbox3 from "../Broadphase/Hitbox3.mjs";
 
 var SpatialHash = class {
-    static seperatorCharacter = ":";
+    static hashConstants = [4917, 2933, 9893, 512];
     constructor(options) {
         this.world = options?.world ?? null;
         this.spatialHashes = [];
@@ -26,7 +26,7 @@ var SpatialHash = class {
     }
 
     hash(cellPos) {
-        return cellPos.x + this.constructor.seperatorCharacter + cellPos.y + this.constructor.seperatorCharacter + cellPos.z;
+        return ((cellPos.x * this.constructor.hashConstants[0]) ^ (cellPos.y * this.constructor.hashConstants[1]) ^ (cellPos.z * this.constructor.hashConstants[2])) % this.constructor.hashConstants[3];
     }
 
     remove(id) {

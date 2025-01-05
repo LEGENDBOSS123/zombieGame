@@ -11,6 +11,7 @@ var CollisionDetector = class {
         this.world = options?.world ?? null;
         this.contacts = options?.contacts ?? [];
         this.handlers = {};
+        this.binarySearchDepth = options?.binarySearchDepth ?? 4;
         this.initHandlers();
     }
 
@@ -283,7 +284,7 @@ var CollisionDetector = class {
             return distanceSquared - sphere1.radius * sphere1.radius;
         }.bind(this);
         var t = 1;
-        for (var i = 0; i < 8; i++) {
+        for (var i = 0; i < this.binarySearchDepth; i++) {
             t = (minT + maxT) / 2;
             var result = binarySearch(t);
             if (result > 0) {
@@ -408,7 +409,7 @@ var CollisionDetector = class {
             return distanceSquared - (sphere1.radius + sphere2.radius) * (sphere1.radius + sphere2.radius);
         }.bind(this);
         var t = 1;
-        for (var i = 0; i < 8; i++) {
+        for (var i = 0; i < this.binarySearchDepth; i++) {
             t = (minT + maxT) / 2;
             var result = binarySearch(t);
             if (result > 0) {
@@ -618,13 +619,16 @@ var CollisionDetector = class {
     }
 
     toJSON() {
-        return {};
+        return {
+            binarySearchDepth: this.binarySearchDepth
+        };
     }
 
     static fromJSON(json, world) {
         var collisionDetector = new CollisionDetector({
             world: world
         });
+        collisionDetector.binarySearchDepth = json.binarySearchDepth;
         return collisionDetector;
     }
 };

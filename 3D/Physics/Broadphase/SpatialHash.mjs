@@ -29,11 +29,11 @@ var SpatialHash = class {
         return cellPos.x + this.constructor.seperatorCharacter + cellPos.y + this.constructor.seperatorCharacter + cellPos.z;
     }
 
-    remove(id){
+    remove(id) {
         this.removeHitbox(id);
         delete this.ids[id];
     }
-    
+
     getCellPosition(v, hash) {
         return new Vector3(Math.floor(v.x * hash.inverseGridSize), Math.floor(v.y * hash.inverseGridSize), Math.floor(v.z * hash.inverseGridSize));
     }
@@ -43,13 +43,13 @@ var SpatialHash = class {
     }
 
     _addHitbox(hitbox, id, hash = this.spatialHashes[0]) {
-        
+
         if (hash.final) {
             hash.hashmap.add(id);
             this.ids[id].hash = hash;
             return true;
         }
-        
+
         var min = this.getCellPosition(hitbox.min, hash);
         var max = this.getCellPosition(hitbox.max, hash);
         if (this.getSizeHeuristic(min, max) > hash.threshold) {
@@ -186,18 +186,18 @@ var SpatialHash = class {
             hash.threshold = this.spatialHashes[i].threshold;
             hash.final = this.spatialHashes[i].final;
             hash.index = this.spatialHashes[i].index;
-            if(!this.spatialHashes[i].final){
+            if (!this.spatialHashes[i].final) {
                 hash.next = i + 1;
                 hash.hashmap = new Map(this.spatialHashes[i].hashmap);
             }
-            else{
+            else {
                 hash.next = null;
                 hash.hashmap = spatialHash.global;
             }
             spatialHash.spatialHashes.push(hash);
         }
         spatialHash.ids = {};
-        for(var i in this.ids){
+        for (var i in this.ids) {
             spatialHash.ids[i] = {};
             spatialHash.ids[i].hitbox = this.ids[i].hitbox.toJSON();
             spatialHash.ids[i].hash = this.ids[i].hash.index;
@@ -212,12 +212,12 @@ var SpatialHash = class {
         spatialHash.spatialHashes = json.spatialHashes;
         for (var i = 0; i < spatialHash.spatialHashes.length; i++) {
             var hash = spatialHash.spatialHashes[i];
-            if(!hash.final){
+            if (!hash.final) {
                 hash.next = spatialHash.spatialHashes[hash.next];
             }
         }
         spatialHash.ids = json.ids;
-        for(var i in spatialHash.ids){
+        for (var i in spatialHash.ids) {
             spatialHash.ids[i].hitbox = Hitbox3.fromJSON(spatialHash.ids[i].hitbox);
             spatialHash.ids[i].hash = spatialHash.spatialHashes[spatialHash.ids[i].hash];
         }

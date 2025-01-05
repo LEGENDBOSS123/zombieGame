@@ -22,7 +22,7 @@ var Point = class extends Composite {
 
     setMesh(options, graphicsEngine) {
         var geometry = options?.geometry ?? new graphicsEngine.THREE.SphereGeometry(options?.radius ?? 1, 16, 16);
-        this.mesh = new graphicsEngine.THREE.Mesh(geometry, options?.material ?? new graphicsEngine.THREE.MeshPhongMaterial({ color: 0x00ff00, wireframe: true }));
+        this.mesh = graphicsEngine.meshLinker.createMeshData(new graphicsEngine.THREE.Mesh(geometry, options?.material ?? new graphicsEngine.THREE.MeshPhongMaterial({ color: 0x00ff00, wireframe: true })));
     }
 
     toJSON(){

@@ -3,15 +3,21 @@ var MeshLinker = class {
     constructor() {
         this.meshes = {};
     }
-    addMesh(id, mesh) {
-        this.meshes[id] = {
+
+    createMeshData(mesh, animations = []){
+        return {
             mesh: mesh,
-            id: id,
+            animations: animations,
+            id: null,
             isMeshLink: true
         }
     }
+    addMesh(id, mesh) {
+        this.meshes[id] = mesh;
+        mesh.id = id;
+    }
     removeMesh(id) {
-        if(!this.meshes[id]){
+        if (!this.meshes[id]) {
             return;
         }
         delete this.meshes[id];
@@ -19,10 +25,10 @@ var MeshLinker = class {
     getByID(id) {
         return this.meshes[id];
     }
-    update(previousWorld, world, lerpAmount){
-        for(var meshID in this.meshes){
+    update(previousWorld, world, lerpAmount) {
+        for (var meshID in this.meshes) {
             var mesh = this.meshes[meshID];
-            if(!world.getByID(meshID) || !previousWorld.getByID(meshID)){
+            if (!world.getByID(meshID) || !previousWorld.getByID(meshID)) {
                 mesh.mesh.visible = false;
                 continue;
             }

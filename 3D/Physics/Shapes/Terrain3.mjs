@@ -410,7 +410,7 @@ var Terrain3 = class extends Composite {
         this.setColorGeometry(backGeo, graphicsEngine);
 
 
-        this.mesh = new graphicsEngine.THREE.Mesh();
+        this.mesh = graphicsEngine.meshLinker.createMeshData(new graphicsEngine.THREE.Mesh());
 
         var topMaterial = material.clone();
         var botMaterial = material.clone();

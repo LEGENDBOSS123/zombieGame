@@ -60,7 +60,7 @@ var Slime = class extends HealthUnit {
                     child.receiveShadow = true;
                 }
             })
-            this.sphere.mesh = gltf.scene;
+            this.sphere.mesh = graphicsEngine.meshLinker.createMeshData(gltf.scene);
             this.addToScene(graphicsEngine.scene);
         }.bind(this));
     }

@@ -43,7 +43,7 @@ var Sphere = class extends Composite {
     setMesh(options, graphicsEngine) {
         var geometry = options?.geometry ?? new graphicsEngine.THREE.SphereGeometry(this.radius, 32, 32);
         this.setColorGeometry(geometry, graphicsEngine);
-        this.mesh = new graphicsEngine.THREE.Mesh(geometry, options?.material ?? new graphicsEngine.THREE.MeshPhongMaterial({ color: 0x00ff00, wireframe: true }));
+        this.mesh = graphicsEngine.meshLinker.createMeshData(new graphicsEngine.THREE.Mesh(geometry, options?.material ?? new graphicsEngine.THREE.MeshPhongMaterial({ color: 0x00ff00, wireframe: true })));
     }
 
     setMeshAndAddToScene(options, graphicsEngine) {
@@ -51,13 +51,13 @@ var Sphere = class extends Composite {
         this.addToScene(graphicsEngine.scene);
     }
 
-    toJSON(){
+    toJSON() {
         var composite = super.toJSON();
         composite.radius = this.radius;
         return composite;
     }
 
-    static fromJSON(json, world){
+    static fromJSON(json, world) {
         var sphere = super.fromJSON(json, world);
         sphere.radius = json.radius;
         return sphere;

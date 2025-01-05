@@ -45,7 +45,7 @@ var Ability = class {
     }
 
     _activate(timeHeld) {
-        if(!this.active){
+        if (!this.active) {
             return;
         }
         this.holding = false;
@@ -58,7 +58,6 @@ var Ability = class {
     }
 
     createHTML() {
-        //var document = this.document;
         var container = document.createElement('div');
         container.style.width = "100%";
         container.style.height = "100%";
@@ -69,20 +68,20 @@ var Ability = class {
         return container;
     }
 
-    update(){
+    update() {
         var ratio = 1;
-        if(this.holding){
+        if (this.holding) {
             ratio = (performance.now() - this.holdTimeStamp) / this.maxHoldTime;
             this.html.style.backgroundColor = 'red';
         }
-        else{
+        else {
             ratio = (performance.now() - this.lastUsedTime) / this.reloadTime;
             this.html.style.backgroundColor = 'white';
         }
-        if(ratio > 1){
+        if (ratio > 1) {
             ratio = 1;
         }
-        this.html.style.height = (ratio*100) + "%";
+        this.html.style.height = (ratio * 100) + "%";
     }
 }
 

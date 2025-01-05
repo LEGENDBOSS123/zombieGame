@@ -126,10 +126,11 @@ var Player = class extends HealthUnit {
         //     }
         //     this.addToScene(graphicsEngine.scene);
         // }.bind(this));
-        graphicsEngine.load("player.glb", function (gltf) {
-            gltf.scene.scale.set(1,1,1);
+        graphicsEngine.load("player2.glb", function (gltf) {
+            gltf.scene.scale.set(0.01,0.01,0.01);
+            top.gltf = gltf;
             for(var e of gltf.scene.children){
-                e.position.y -= 1;
+                e.position.y -= 100;
             }
             gltf.scene.traverse(function (child) {
                 if (child.isMesh) {
@@ -137,7 +138,7 @@ var Player = class extends HealthUnit {
                     child.receiveShadow = true;
                 }
             })
-            this.composite.mesh = gltf.scene;
+            this.composite.mesh = graphicsEngine.meshLinker.createMeshData(gltf.scene, graphicsEngine.createAnimations(gltf.scene, gltf.animations));
             this.addToScene(graphicsEngine.scene);
         }.bind(this));
         // this.spheres.forEach(sphere => {

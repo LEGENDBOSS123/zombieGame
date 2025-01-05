@@ -44,7 +44,7 @@ var GraphicsEngine = class {
         this.scene.add(this.camera);
 
         this.textureLoader = new AutoTextureLoader();
-
+        this.mixer = THREE.AnimationMixer;
         this.composer = new EffectComposer(this.renderer);
         this.renderPass = new RenderPass(this.scene, this.camera);
         this.renderPass.renderToScreen = false;
@@ -109,12 +109,27 @@ var GraphicsEngine = class {
         this.meshLinker.update(previousWorld, world, lerpAmount);
     }
     render() {
+        if(top.mixer){
+            top.mixer.update(0.01);
+        }
         this.sunlight.position.copy(this.camera.position);
         this.sunlight.position.sub(this.sunlight.direction.clone().multiplyScalar(this.sunlight.shadow.camera.far * 0.5));
         this.sunlight.target.position.addVectors(this.sunlight.position, this.sunlight.direction);
         this.fog.near = this.renderDistance * this.fogRatio;
         this.fog.far = this.renderDistance;
         this.composer.render();
+    }
+
+    createAnimations(model, animations){
+        var mixer = new this.mixer(model);
+        var actions = [];
+        for(var animation of animations){
+            actions.push(mixer.clipAction(animation));
+        }
+        return {
+            mixer: mixer,
+            actions: actions
+        }
     }
 
     setBackgroundImage(url, setBackground = true, setEnvironment = false) {

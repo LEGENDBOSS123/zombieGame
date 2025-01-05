@@ -302,7 +302,7 @@ ability3.onActivate = function (timeHeld) {
     direction.y = 0;
     direction.normalizeInPlace();
     var addition = player.composite.global.body.getVelocity();
-    if(addition.dot(direction) < 0){
+    if (addition.dot(direction) < 0) {
         addition = new Vector3(0, 0, 0);
     }
     sphere.global.body.setVelocity(direction.scale(0.3).add(addition));
@@ -355,7 +355,7 @@ for (var i = 0; i < 1; i++) {
                 box.setFriction(0);
                 box.setLocalFlag(Composite.FLAGS.STATIC, true);
                 world.addComposite(box);
-                box.mesh = child.clone();
+                box.mesh = graphicsEngine.meshLinker.createMeshData(child.clone());
 
 
                 if (child.name.toLowerCase().includes("checkpoint") || child.name.toLowerCase().includes("spawn")) {

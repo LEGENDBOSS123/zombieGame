@@ -48,7 +48,7 @@ var World = class {
     }
 
     step() {
-        for(var i in this.all){
+        for (var i in this.all) {
             this.all[i].dispatchEvent("preStep");
         }
         for (var iter = 0; iter < this.iterations; iter++) {
@@ -67,9 +67,9 @@ var World = class {
                 this.all[i].dispatchEvent("postIteration");
             }
         }
-        for(var i in this.all){
+        for (var i in this.all) {
             this.all[i].dispatchEvent("postStep");
-            if(this.all[i].toBeRemoved){
+            if (this.all[i].toBeRemoved) {
                 this.all[i].dispatchEvent("delete");
                 this.remove(this.all[i]);
             }
@@ -91,7 +91,7 @@ var World = class {
         world.all = {};
 
         for (var i in this.all) {
-            world.all[i]  =this.getByID(i).toJSON();
+            world.all[i] = this.getByID(i).toJSON();
         }
 
 

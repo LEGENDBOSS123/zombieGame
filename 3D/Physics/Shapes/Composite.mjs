@@ -49,7 +49,8 @@ var Composite = class {
         this.setLocalFlag(this.constructor.FLAGS.OCCUPIES_SPACE, false);
 
         this.events = {};
-        this.toBeRemoved = false;
+        this.toBeRemoved = options?.toBeRemoved ?? false;
+        this.isSensor = options?.isSensor ?? false;
 
         this.local.hitbox = new Hitbox3(options?.local?.hitbox);
         this.graphicsEngine = null;

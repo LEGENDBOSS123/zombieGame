@@ -109,7 +109,11 @@ var CollisionDetector = class {
                 maxParentMap.set(contact.body2.maxParent.id, { penetrationSum: 0, contacts: [] });
             }
             contact.material = contact.body1.material.getCombined(contact.body2.material);
-
+            if(contact.body1.isSensor || contact.body2.isSensor) {
+                contact.penetration = new Vector3();
+                contact.impulse = new Vector3();
+                contact.solved = true;
+            }
             var contacts = maxParentMap.get(contact.body1.maxParent.id).contacts;
             contacts.push(contact);
             maxParentMap.get(contact.body1.maxParent.id).penetrationSum += contact.penetration.magnitudeSquared();

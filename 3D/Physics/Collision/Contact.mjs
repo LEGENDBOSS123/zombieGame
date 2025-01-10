@@ -41,13 +41,26 @@ var Contact = class {
         rotationalEffects1Fric = isFinite(rotationalEffects1Fric) ? rotationalEffects1Fric : 0;
         rotationalEffects2Fric = isFinite(rotationalEffects2Fric) ? rotationalEffects2Fric : 0;
         
-        var denominator = this.body1.maxParent.global.body.inverseMass + rotationalEffects1 * (1 - this.body1.maxParent.global.body.angularDamping);
+        var invMass1 = this.body1.maxParent.global.body.inverseMass;
+        var invMass2 = this.body2.maxParent.global.body.inverseMass;
 
-        denominator += this.body2.maxParent.global.body.inverseMass + rotationalEffects2 * (1 - this.body2.maxParent.global.body.angularDamping);
+        if(this.body1.maxParent.isImmovable()){
+            invMass1 = 0;
+            rotationalEffects1 = 0;
+            rotationalEffects1Fric = 0;
+        }
+        if(this.body2.maxParent.isImmovable()){
+            invMass2 = 0;
+            rotationalEffects2 = 0;
+            rotationalEffects2Fric = 0;
+        }
+        var denominator = invMass1 * (1 - this.body1.maxParent.global.body.linearDamping.multiply(this.normal).magnitude()) + rotationalEffects1 * (1 - this.body1.maxParent.global.body.angularDamping);
 
-        var denominatorFric = this.body1.maxParent.global.body.inverseMass + rotationalEffects1Fric * (1 - this.body1.maxParent.global.body.angularDamping);
+        denominator += invMass2 * (1 - this.body2.maxParent.global.body.linearDamping.multiply(this.normal).magnitude()) + rotationalEffects2 * (1 - this.body2.maxParent.global.body.angularDamping);
 
-        denominatorFric += this.body2.maxParent.global.body.inverseMass + rotationalEffects2Fric * (1 - this.body2.maxParent.global.body.angularDamping);
+        var denominatorFric = invMass1 + rotationalEffects1Fric * (1 - this.body1.maxParent.global.body.angularDamping);
+
+        denominatorFric += invMass2 + rotationalEffects2Fric * (1 - this.body2.maxParent.global.body.angularDamping);
         
 
         var impulse = - (1 + restitution) * impactSpeed / denominator;

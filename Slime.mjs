@@ -18,13 +18,28 @@ var Slime = class extends HealthUnit {
         this.sphere.radius = options?.radius ?? 1;
         this.maxJumpCooldown = options?.maxJumpCooldown ?? 50;
         this.jumpCooldown = options?.jumpCooldown ?? 0;
-        this.sphere.setRestitution(1);
+        this.sphere.setRestitution(0);
         this.sphere.setFriction(0.5);
         this.sphere.global.body.linearDamping = new Vector3(0.02, 0, 0.02)
         this.sphere.global.body.angularDamping = 1;
+        this.target = null;
         this.sphere.calculateLocalHitbox();
-        this.jumpPostCollision = function (contact) {
+        this.handleTargetHit = function(target){
+            var world = this.sphere.world;
+            var targetBody = world.getByID(target.followID);
+            if(!targetBody){
+                this.target = null;
+                return;
+            }
+            targetBody.children[0].toBeRemoved = true;
+        }
+        this.spherePostCollision = function (contact) {
             if (contact.body1.maxParent == this.sphere) {
+                if(this.target){
+                    if(contact.body2.maxParent.id == this.target.followID){
+                        this.handleTargetHit(this.target);
+                    }
+                }
                 if (contact.normal.dot(new Vector3(0, 1, 0)) > 0.75) {
                     if(this.jumpCooldown <= 0){
                         this.jumpCooldown = this.maxJumpCooldown;
@@ -32,6 +47,11 @@ var Slime = class extends HealthUnit {
                 }
             }
             else {
+                if(this.target){
+                    if(contact.body1.maxParent.id == this.target.followID){
+                        this.handleTargetHit(this.target);
+                    }
+                }
                 if (contact.normal.dot(new Vector3(0, -1, 0)) > 0.75) {
                     if(this.jumpCooldown <= 0){
                         this.jumpCooldown = this.maxJumpCooldown;
@@ -39,7 +59,12 @@ var Slime = class extends HealthUnit {
                 }
             }
         }.bind(this);
-        this.sphere.addEventListener("postCollision", this.jumpPostCollision);
+
+        this.onDelete = function (x) {
+            console.log("e", x)
+        }.bind(this);
+        this.sphere.addEventListener("postCollision", this.spherePostCollision);
+        this.sphere.addEventListener("delete", this.onDelete);
         
     }
 
@@ -77,6 +102,7 @@ var Slime = class extends HealthUnit {
         if (!target) {
             return;
         }
+        this.target = target;
         var targetBody = world.getByID(target.followID);
         if (!targetBody) {
             return;
@@ -130,7 +156,8 @@ var Slime = class extends HealthUnit {
 
     updateReferences(world) {
         this.sphere = world.getByID(this.sphere);
-        this.sphere.addEventListener("postCollision", this.jumpPostCollision);
+        this.sphere.addEventListener("postCollision", this.spherePostCollision);
+        this.sphere.addEventListener("delete", this.onDelete);
     }
 }
 

@@ -21,7 +21,7 @@ import Keysheld from "./3D/Web/Keysheld.mjs";
 
 import AssetManager from "./3D/Graphics/AssetManager.mjs"
 
-import Stats from "./3D/Web/Stats.mjs"
+import Stats from "./3D/Web/Stats.mjs";
 import GraphicsEngine from "./3D/Graphics/GraphicsEngine.mjs";
 import SlimeSpawner from "./SlimeSpawner.mjs";
 

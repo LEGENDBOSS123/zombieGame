@@ -37,6 +37,7 @@ var Composite = class {
         this.maxParent = options?.maxParents ?? this;
         this.children = options?.children ?? [];
         this.material = options?.material ?? new Material();
+        this.collisionMask = options?.collisionMask ?? 0b00000000000000000000000001;
         this.global = {};
         this.global.body = new PhysicsBody3(options?.global?.body);
         this.global.hitbox = new Hitbox3(options?.global?.hitbox);
@@ -187,11 +188,18 @@ var Composite = class {
         return (this.local.flags & flag) != 0;
     }
 
+    isImmovable() {
+        return this.getLocalFlag(this.constructor.FLAGS.STATIC | this.constructor.FLAGS.KINEMATIC);
+    }
+
     canCollideWith(other) {
         if (other.maxParent == this.maxParent) {
             return false;
         }
-        if (this.getLocalFlag(Composite.FLAGS.STATIC | Composite.FLAGS.KINEMATIC) && other.getLocalFlag(Composite.FLAGS.STATIC | Composite.FLAGS.KINEMATIC)) {
+        if(this.collisionMask & other.collisionMask == 0) {
+            return false;
+        }
+        if (this.maxParent.isImmovable() && other.maxParent.isImmovable()) {
             return false;
         }
         return true;

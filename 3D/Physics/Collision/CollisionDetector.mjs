@@ -11,7 +11,7 @@ var CollisionDetector = class {
         this.world = options?.world ?? null;
         this.contacts = options?.contacts ?? [];
         this.handlers = {};
-        this.binarySearchDepth = options?.binarySearchDepth ?? 4;
+        this.binarySearchDepth = options?.binarySearchDepth ?? 6;
         this.initHandlers();
     }
 

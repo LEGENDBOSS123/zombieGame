@@ -72,16 +72,17 @@ var Player = class extends HealthUnit {
         this.postStepCallback = function () {
             var vel = this.composite.global.body.getVelocity();
             var velXZ = new Vector3(vel.x, 0, vel.z);
-            if(velXZ.magnitudeSquared() < 0.005){
-                if(this.composite.mesh){
-                    this.composite.mesh.animations.actions[0].timeScale = 0;
-                }
-                return;
-            }
             if(this.composite.mesh){
                 this.composite.mesh.animations.actions[0].timeScale = 1;
                 this.composite.mesh.animations.actions[0].timeScale = velXZ.magnitude() * 5;
             }
+            if(velXZ.magnitudeSquared() < 0.005){
+                if(this.composite.mesh){
+                    //this.composite.mesh.animations.actions[0].timeScale = 0;
+                }
+                return;
+            }
+            
             this.composite.global.body.rotation = Quaternion.lookAt(velXZ.normalize(), new Vector3(0, 1, 0));
             
         }.bind(this);

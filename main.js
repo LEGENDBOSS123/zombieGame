@@ -334,7 +334,7 @@ for (var i = 0; i < 1; i++) {
 }
 
 setInterval(function () {
-    if(slimes.length > 20){
+    if(slimes.length > 30){
         return;
     }
     slimes.push(slimeSpawner.spawnSlime(Slime, world, graphicsEngine));

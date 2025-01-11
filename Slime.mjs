@@ -22,6 +22,8 @@ var Slime = class extends HealthUnit {
         this.sphere.setFriction(0.5);
         this.sphere.global.body.linearDamping = new Vector3(0.02, 0, 0.02)
         this.sphere.global.body.angularDamping = 1;
+        // this.sphere.collisionMask = 0b00000000000000000000000010;
+        // this.sphere.canCollideWithMask = 0b00000000000000000000000001;
         this.target = null;
         this.sphere.calculateLocalHitbox();
         this.handleTargetHit = function(target){
@@ -59,7 +61,6 @@ var Slime = class extends HealthUnit {
                 }
             }
         }.bind(this);
-
         this.onDelete = function (x) {
             console.log("e", x)
         }.bind(this);

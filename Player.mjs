@@ -45,6 +45,8 @@ var Player = class extends HealthUnit {
         }));
         for (var sphere of this.spheres) {
             this.composite.add(sphere);
+            sphere.collisionMask = 0;
+            sphere.collisionMask = sphere.setBitMask(sphere.collisionMask, "P", true);
         }
         this.composite.setLocalFlag(Composite.FLAGS.CENTER_OF_MASS, true);
         this.composite.syncAll();

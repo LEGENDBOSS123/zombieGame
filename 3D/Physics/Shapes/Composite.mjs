@@ -59,6 +59,20 @@ var Composite = class {
 
     }
 
+
+    setBitMask(mask, letter, value){
+        var position = letter.charCodeAt(0) - "A".charCodeAt(0);
+        if (value) {
+            return mask |= 1 << position;
+        }
+        return mask &= ~(1 << position);
+    }
+
+    toggleBitMask(mask, letter) {
+        var position = letter.charCodeAt(0) - "A".charCodeAt(0);
+        return mask ^= 1 << position;
+    }
+
     addEventListener(event, callback) {
         if (!this.events[event]) {
             this.events[event] = [];
@@ -199,7 +213,6 @@ var Composite = class {
             return false;
         }
         if((this.collisionMask & other.canCollideWithMask) == 0 || (this.canCollideWithMask & other.collisionMask) == 0) {
-            console.log("e");
             return false;
         }
         if (this.maxParent.isImmovable() && other.maxParent.isImmovable()) {

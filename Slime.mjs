@@ -18,12 +18,12 @@ var Slime = class extends HealthUnit {
         this.sphere.radius = options?.radius ?? 1;
         this.maxJumpCooldown = options?.maxJumpCooldown ?? 50;
         this.jumpCooldown = options?.jumpCooldown ?? 0;
-        this.sphere.setRestitution(0);
+        this.sphere.setRestitution(1);
         this.sphere.setFriction(0.5);
         this.sphere.global.body.linearDamping = new Vector3(0.02, 0, 0.02)
         this.sphere.global.body.angularDamping = 1;
-        // this.sphere.collisionMask = 0b00000000000000000000000010;
-        // this.sphere.canCollideWithMask = 0b00000000000000000000000001;
+        this.sphere.collisionMask = 0;
+        this.sphere.collisionMask = this.sphere.setBitMask(this.sphere.collisionMask, "S", true);
         this.target = null;
         this.sphere.calculateLocalHitbox();
         this.handleTargetHit = function(target){
@@ -33,7 +33,7 @@ var Slime = class extends HealthUnit {
                 this.target = null;
                 return;
             }
-            targetBody.children[0].toBeRemoved = true;
+            //targetBody.children[0].toBeRemoved = true;
         }
         this.spherePostCollision = function (contact) {
             if (contact.body1.maxParent == this.sphere) {

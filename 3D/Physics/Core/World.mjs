@@ -44,10 +44,10 @@ var World = class {
 
     remove(element) {
         element.dispatchEvent("delete");
-        if(element.parent){
-            element.parent.children.splice(element.parent.children.indexOf(element),1);
+        if (element.parent) {
+            element.parent.children.splice(element.parent.children.indexOf(element), 1);
         }
-        for(var i in element.children){
+        for (var i in element.children) {
             this.remove(element.children[i]);
         }
         this.spatialHash.remove(element.id);
@@ -76,11 +76,11 @@ var World = class {
         }
         for (var i in this.all) {
             this.all[i].dispatchEvent("postStep");
-            
+
         }
-        for(var i in this.all){
+        for (var i in this.all) {
             if (this.all[i].toBeRemoved) {
-                
+
                 this.remove(this.all[i]);
             }
         }

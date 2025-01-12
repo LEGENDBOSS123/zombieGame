@@ -114,57 +114,46 @@ var CollisionDetector = class {
                 contact.impulse = new Vector3();
                 contact.solved = true;
             }
-            var contacts = maxParentMap.get(contact.body1.maxParent.id).contacts;
+            var body1Map = maxParentMap.get(contact.body1.maxParent.id);
+            var body2Map = maxParentMap.get(contact.body2.maxParent.id);
+            contact.body1Map = body1Map;
+            contact.body2Map = body2Map;
+            var contacts = body1Map.contacts;
             contacts.push(contact);
-            maxParentMap.get(contact.body1.maxParent.id).penetrationSum += contact.penetration.magnitudeSquared();
+            body1Map.penetrationSum += contact.penetration.magnitudeSquared();
 
-            contacts = maxParentMap.get(contact.body2.maxParent.id).contacts;
+            
+            contacts = body2Map.contacts;
             contacts.push(contact);
-            maxParentMap.get(contact.body2.maxParent.id).penetrationSum += contact.penetration.magnitudeSquared();
+            body2Map.penetrationSum += contact.penetration.magnitudeSquared();
         }
 
-
-        for (var [key, value] of maxParentMap) {
-            for (var i = 0; i < value.contacts.length; i++) {
-                var contact = value.contacts[i];
-                contact.solve();
-                if (key == contact.body1.maxParent.id) {
-                    contact.body1.dispatchEvent("preCollision", [contact]);
-                    if (maxParentMap.get(contact.body1.maxParent.id).penetrationSum != 0) {
-                        contact.body1.maxParent.applyForce(contact.impulse.scale(contact.penetration.magnitudeSquared() / maxParentMap.get(contact.body1.maxParent.id).penetrationSum), contact.point);
-                    }
-                }
-                else {
-                    contact.body2.dispatchEvent("preCollision", [contact]);
-                    if (maxParentMap.get(contact.body2.maxParent.id).penetrationSum != 0) {
-                        contact.body2.maxParent.applyForce(contact.impulse.scale(-contact.penetration.magnitudeSquared() / maxParentMap.get(contact.body2.maxParent.id).penetrationSum), contact.point);
-                    }
-                }
-            }
-        }
         var totalTranslation = new Vector3();
         for (var [key, value] of maxParentMap) {
             totalTranslation.reset();
             for (var i = 0; i < value.contacts.length; i++) {
                 var contact = value.contacts[i];
+                contact.solve();
                 var translation = contact.penetration;
                 var totalMass = contact.body1.maxParent.global.body.mass + contact.body2.maxParent.global.body.mass;
-
                 if (key == contact.body1.maxParent.id) {
+                    contact.body1.dispatchEvent("preCollision", [contact]);
                     var massRatio2 = contact.body2.maxParent.global.body.mass / totalMass;
                     massRatio2 = isNaN(massRatio2) ? 1 : massRatio2;
-                    if (maxParentMap.get(contact.body1.maxParent.id).penetrationSum != 0) {
-                        totalTranslation.addInPlace(translation.scale(contact.penetration.magnitudeSquared() / maxParentMap.get(contact.body1.maxParent.id).penetrationSum * massRatio2));
+                    if (contact.body1Map.penetrationSum != 0) {
+                        contact.body1.maxParent.applyForce(contact.impulse.scale(contact.penetration.magnitudeSquared() / contact.body1Map.penetrationSum), contact.point);
+                        totalTranslation.addInPlace(translation.scale(contact.penetration.magnitudeSquared() / contact.body1Map.penetrationSum * massRatio2));
                     }
                 }
                 else {
                     var massRatio1 = contact.body1.maxParent.global.body.mass / totalMass;
                     massRatio1 = isNaN(massRatio1) ? 1 : massRatio1;
-                    if (maxParentMap.get(contact.body2.maxParent.id).penetrationSum != 0) {
-                        totalTranslation.addInPlace(translation.scale(-contact.penetration.magnitudeSquared() / maxParentMap.get(contact.body2.maxParent.id).penetrationSum * massRatio1));
+                    contact.body2.dispatchEvent("preCollision", [contact]);
+                    if (contact.body2Map.penetrationSum != 0) {
+                        contact.body2.maxParent.applyForce(contact.impulse.scale(-contact.penetration.magnitudeSquared() / contact.body2Map.penetrationSum), contact.point);
+                        totalTranslation.addInPlace(translation.scale(-contact.penetration.magnitudeSquared() / contact.body2Map.penetrationSum * massRatio1));
                     }
                 }
-
             }
             if (key == contact.body1.maxParent.id) {
                 contact.body1.translate(totalTranslation);
@@ -173,7 +162,7 @@ var CollisionDetector = class {
                 contact.body2.translate(totalTranslation);
             }
         }
-
+        
         for (var [key, value] of maxParentMap) {
             for (var i = 0; i < value.contacts.length; i++) {
                 var contact = value.contacts[i];

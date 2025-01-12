@@ -312,6 +312,10 @@ ability3.onActivate = function (timeHeld) {
     sphere.addEventListener("postCollision", function (contact) {
         //sphere.toBeRemoved = true;
     });
+    sphere.collisionMask = 0;
+    sphere.collisionMask = sphere.setBitMask(sphere.collisionMask, "B", true);
+    sphere.canCollideWithMask = sphere.setBitMask(sphere.canCollideWithMask, "P", false);
+    sphere.canCollideWithMask = sphere.setBitMask(sphere.canCollideWithMask, "B", false);
     sphere.setMeshAndAddToScene({}, this.graphicsEngine);
 }
 hotbar.addAbility(ability3);
@@ -334,7 +338,7 @@ for (var i = 0; i < 1; i++) {
 }
 
 setInterval(function () {
-    if(slimes.length > 30){
+    if(slimes.length > 50){
         return;
     }
     slimes.push(slimeSpawner.spawnSlime(Slime, world, graphicsEngine));
@@ -400,7 +404,7 @@ var fps = 20;
 var steps = 0;
 var previousWorld = 0;
 function render() {
-    stats.begin();
+    //stats.begin();
 
     if (keyListener.isHeld("ArrowUp") || keyListener.isHeld("KeyW")) {
         cameraControls.forward();
@@ -441,9 +445,10 @@ function render() {
         for (var slime of slimes) {
             slime.update(targets, world);
         }
-
+        stats.begin();
         world.step();
 
+        stats.end();
         steps++;
 
         if (cameraControls.movement.up && player.canJump) {
@@ -469,7 +474,7 @@ function render() {
     graphicsEngine.render();
     requestAnimationFrame(render);
 
-    stats.end();
+    //stats.end();
 }
 
 

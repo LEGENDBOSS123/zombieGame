@@ -16,6 +16,9 @@ var Contact = class {
         this.point = options?.point;
         this.velocity = options?.velocity;
 
+        this.body1Map = options?.body1Map;
+        this.body2Map = options?.body2Map;
+
         this.combinedMaterial = options?.combinedMaterial;
     }
 

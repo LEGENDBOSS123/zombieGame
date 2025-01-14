@@ -68,6 +68,13 @@ var Composite = class {
         return mask &= ~(1 << position);
     }
 
+    getEffectiveTotalMass() {
+        if(this.isImmovable()){
+            return Infinity;
+        }
+        return this.global.body.mass * (1 - this.global.body.linearDamping);
+    }
+
     toggleBitMask(mask, letter) {
         var position = letter.charCodeAt(0) - "A".charCodeAt(0);
         return mask ^= 1 << position;
@@ -222,9 +229,12 @@ var Composite = class {
     }
 
     translate(v) {
+        if(this.maxParent.isImmovable()) {
+            return;
+        }
         if (this.isMaxParent()) {
-            var velocity = this.global.body.getVelocity();
-            this.global.body.position.addInPlace(v);
+            var velocity = this.global.body.getVelocity()
+            this.global.body.position.addInPlace(v.multiply(new Vector3(1, 1, 1).subtract(this.global.body.linearDamping)));
             this.global.body.setVelocity(velocity);
             this.translateChildrenGlobal(v);
             return;

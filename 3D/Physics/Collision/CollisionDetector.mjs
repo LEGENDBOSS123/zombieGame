@@ -98,15 +98,16 @@ var CollisionDetector = class {
     }
 
     resolveAllContacts() {
-        var maxParentMap = new Map();
+        var maxParentMap = new Object(null);
+        
         for (var i = 0; i < this.contacts.length; i++) {
             var contact = this.contacts[i];
-            if (!maxParentMap.has(contact.body1.maxParent.id)) {
-                maxParentMap.set(contact.body1.maxParent.id, { penetrationSum: 0, contacts: [] });
+            if (!maxParentMap[contact.body1.maxParent.id]) {
+                maxParentMap[contact.body1.maxParent.id] =  { penetrationSum: 0, contacts: [] };
             }
 
-            if (!maxParentMap.has(contact.body2.maxParent.id)) {
-                maxParentMap.set(contact.body2.maxParent.id, { penetrationSum: 0, contacts: [] });
+            if (!maxParentMap[contact.body2.maxParent.id]) {
+                maxParentMap[contact.body2.maxParent.id] = { penetrationSum: 0, contacts: [] };
             }
             contact.material = contact.body1.material.getCombined(contact.body2.material);
             if(contact.body1.isSensor || contact.body2.isSensor) {
@@ -114,8 +115,8 @@ var CollisionDetector = class {
                 contact.impulse = new Vector3();
                 contact.solved = true;
             }
-            var body1Map = maxParentMap.get(contact.body1.maxParent.id);
-            var body2Map = maxParentMap.get(contact.body2.maxParent.id);
+            var body1Map = maxParentMap[contact.body1.maxParent.id];
+            var body2Map = maxParentMap[contact.body2.maxParent.id];
             contact.body1Map = body1Map;
             contact.body2Map = body2Map;
             var contacts = body1Map.contacts;
@@ -129,16 +130,17 @@ var CollisionDetector = class {
         }
 
         var totalTranslation = new Vector3();
-        for (var [key, value] of maxParentMap) {
+        for (var key in maxParentMap) {
+            var value = maxParentMap[key];
             totalTranslation.reset();
             for (var i = 0; i < value.contacts.length; i++) {
                 var contact = value.contacts[i];
                 contact.solve();
                 var translation = contact.penetration;
-                var totalMass = contact.body1.maxParent.global.body.mass + contact.body2.maxParent.global.body.mass;
+                var totalMass = contact.body1.maxParent.getEffectiveTotalMass() + contact.body2.maxParent.getEffectiveTotalMass();
                 if (key == contact.body1.maxParent.id) {
                     contact.body1.dispatchEvent("preCollision", [contact]);
-                    var massRatio2 = contact.body2.maxParent.global.body.mass / totalMass;
+                    var massRatio2 = contact.body2.maxParent.getEffectiveTotalMass() / totalMass;
                     massRatio2 = isNaN(massRatio2) ? 1 : massRatio2;
                     if (contact.body1Map.penetrationSum != 0) {
                         contact.body1.maxParent.applyForce(contact.impulse.scale(contact.penetration.magnitudeSquared() / contact.body1Map.penetrationSum), contact.point);
@@ -146,7 +148,7 @@ var CollisionDetector = class {
                     }
                 }
                 else {
-                    var massRatio1 = contact.body1.maxParent.global.body.mass / totalMass;
+                    var massRatio1 = contact.body1.maxParent.getEffectiveTotalMass() / totalMass;
                     massRatio1 = isNaN(massRatio1) ? 1 : massRatio1;
                     contact.body2.dispatchEvent("preCollision", [contact]);
                     if (contact.body2Map.penetrationSum != 0) {
@@ -163,14 +165,15 @@ var CollisionDetector = class {
             }
         }
         
-        for (var [key, value] of maxParentMap) {
+        for (var key in maxParentMap) {
+            var value = maxParentMap[key];
             for (var i = 0; i < value.contacts.length; i++) {
                 var contact = value.contacts[i];
                 contact.body1.dispatchEvent("postCollision", [contact]);
                 contact.body2.dispatchEvent("postCollision", [contact]);
             }
         }
-        this.contacts.length = 0;
+        this.contacts = [];
     }
 
     getClosestPointToAABB(v, aabb, dimensions) {

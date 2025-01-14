@@ -211,6 +211,14 @@ var GraphicsEngine = class {
     disableAO() {
         this.n8aoPass.enabled = false;
     }
+
+    disableShadows() {
+        this.renderer.shadowMap.enabled = false;
+    }
+
+    enableShadows() {
+        this.renderer.shadowMap.enabled = true;
+    }
 }
 
 

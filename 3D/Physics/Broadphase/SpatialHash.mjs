@@ -6,13 +6,18 @@ var SpatialHash = class {
     constructor(options) {
         this.world = options?.world ?? null;
         this.spatialHashes = [];
-        for (var i = 0; i < (options?.gridSizes?.length ?? 10); i++) {
+        for (var i = 0; i < (options?.gridSizes?.length ?? 8); i++) {
             var spatialHash = {};
             spatialHash.hashmap = new Map();
             spatialHash.gridSize = options?.gridSizes?.[i] ?? Math.pow(4, i) * 0.25;
             spatialHash.inverseGridSize = 1 / spatialHash.gridSize;
-            spatialHash.threshold = options?.thresholds?.[i] ?? 8;
+            spatialHash.threshold = options?.thresholds?.[i] ?? 4;
+            spatialHash.translation = new Vector3();
             spatialHash.index = i;
+            if(spatialHash.index % 2 == 0){
+                spatialHash.translation = new Vector3(spatialHash.gridSize * 0.5, spatialHash.gridSize * 0.5, spatialHash.gridSize * 0.5);
+            }
+            
             this.spatialHashes.push(spatialHash);
         }
         for (var i = 0; i < this.spatialHashes.length - 1; i++) {
@@ -35,7 +40,8 @@ var SpatialHash = class {
     }
 
     getCellPosition(v, hash) {
-        return new Vector3(Math.floor(v.x * hash.inverseGridSize), Math.floor(v.y * hash.inverseGridSize), Math.floor(v.z * hash.inverseGridSize));
+        var v1 = v.add(hash.translation);
+        return new Vector3(Math.floor(v1.x * hash.inverseGridSize), Math.floor(v1.y * hash.inverseGridSize), Math.floor(v1.z * hash.inverseGridSize));
     }
 
     getSizeHeuristic(min, max) {
@@ -184,6 +190,7 @@ var SpatialHash = class {
             hash.gridSize = this.spatialHashes[i].gridSize;
             hash.inverseGridSize = this.spatialHashes[i].inverseGridSize;
             hash.threshold = this.spatialHashes[i].threshold;
+            hash.translation = this.spatialHashes[i].translation.toJSON();
             hash.final = this.spatialHashes[i].final;
             hash.index = this.spatialHashes[i].index;
             if (!this.spatialHashes[i].final) {
@@ -212,6 +219,7 @@ var SpatialHash = class {
         spatialHash.spatialHashes = json.spatialHashes;
         for (var i = 0; i < spatialHash.spatialHashes.length; i++) {
             var hash = spatialHash.spatialHashes[i];
+            hash.translation = Vector3.fromJSON(hash.translation);
             if (!hash.final) {
                 hash.next = spatialHash.spatialHashes[hash.next];
             }

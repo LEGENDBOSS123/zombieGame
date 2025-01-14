@@ -61,13 +61,17 @@ var Contact = class {
 
         denominator += invMass2 * (1 - this.body2.maxParent.global.body.linearDamping.multiply(this.normal).magnitude()) + rotationalEffects2 * (1 - this.body2.maxParent.global.body.angularDamping);
 
-        var denominatorFric = invMass1 + rotationalEffects1Fric * (1 - this.body1.maxParent.global.body.angularDamping);
+        var denominatorFric = invMass1 * (1 - this.body1.maxParent.global.body.linearDamping.multiply(tangentialNorm).magnitude()) + rotationalEffects1Fric * (1 - this.body1.maxParent.global.body.angularDamping);
 
-        denominatorFric += invMass2 + rotationalEffects2Fric * (1 - this.body2.maxParent.global.body.angularDamping);
-        
+        denominatorFric += invMass2 * (1 - this.body2.maxParent.global.body.linearDamping.multiply(tangentialNorm).magnitude()) + rotationalEffects2Fric * (1 - this.body2.maxParent.global.body.angularDamping);
+        if(denominator == 0){
+            this.impulse = new Vector3(0,0,0);
+            this.solved = true;
+            return;
+        }
 
         var impulse = - (1 + restitution) * impactSpeed / denominator;
-
+       
         if (impulse < 0) {
             impulse = 0;
         }

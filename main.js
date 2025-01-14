@@ -63,6 +63,7 @@ graphicsEngine.setBackgroundImage("3D/Graphics/Textures/autumn_field_puresky_8k.
 graphicsEngine.setSunlightDirection(new Vector3(-2, -8, -5));
 graphicsEngine.setSunlightBrightness(1);
 graphicsEngine.disableAO();
+graphicsEngine.disableShadows();
 
 
 graphicsEngine.renderDistance = 1024;
@@ -338,7 +339,7 @@ for (var i = 0; i < 1; i++) {
 }
 
 setInterval(function () {
-    if(slimes.length > 50){
+    if(slimes.length > 0){
         return;
     }
     slimes.push(slimeSpawner.spawnSlime(Slime, world, graphicsEngine));
@@ -357,9 +358,10 @@ for (var i = 0; i < 1; i++) {
 
 
             if (child.isMesh) {
-                var box = new Box({ local: { body: { mass: Infinity } } }).fromMesh(child);
+                var box = new Box({ local: { body: { mass: 1 } } }).fromMesh(child);
                 box.setRestitution(0);
                 box.setFriction(0);
+                
                 box.setLocalFlag(Composite.FLAGS.STATIC, true);
                 world.addComposite(box);
                 box.mesh = graphicsEngine.meshLinker.createMeshData(child.clone());

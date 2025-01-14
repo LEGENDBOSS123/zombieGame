@@ -66,7 +66,7 @@ var PhysicsBody3 = class {
         this.position.addInPlace(this.acceleration.scale(world.deltaTimeSquared * 0.5));
         this.position.addInPlace(this.netForce.scale(this.inverseMass));
 
-        var delta = this.position.subtract(this.previousPosition).multiplyInPlace(this.linearDamping);
+        var delta = this.position.subtract(this.actualPreviousPosition).multiplyInPlace(this.linearDamping);
         this.position.subtractInPlace(delta);
     }
 

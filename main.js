@@ -339,7 +339,7 @@ for (var i = 0; i < 1; i++) {
 }
 
 setInterval(function () {
-    if(slimes.length > 0){
+    if (slimes.length > 0) {
         return;
     }
     slimes.push(slimeSpawner.spawnSlime(Slime, world, graphicsEngine));
@@ -361,7 +361,7 @@ for (var i = 0; i < 1; i++) {
                 var box = new Box({ local: { body: { mass: 1 } } }).fromMesh(child);
                 box.setRestitution(0);
                 box.setFriction(0);
-                
+
                 box.setLocalFlag(Composite.FLAGS.STATIC, true);
                 world.addComposite(box);
                 box.mesh = graphicsEngine.meshLinker.createMeshData(child.clone());
@@ -433,6 +433,10 @@ function render() {
         cameraControls.zoomIn();
     }
     hotbar.update();
+    player.updateHealthTexture(player.composite.mesh, graphicsEngine);
+    for (var slime of slimes) {
+        slime.updateHealthTexture(slime.sphere.mesh, graphicsEngine);
+    }
     cameraControls.updateZoom();
     var now = performance.now();
     var delta = (now - start) / 1000;
@@ -471,7 +475,9 @@ function render() {
     var lerpAmount = (delta * fps - steps);
 
 
+
     graphicsEngine.update(previousWorld || world, world, lerpAmount);
+    
     gameCamera.update(player.getMeshTargetPosition());
     graphicsEngine.render();
     requestAnimationFrame(render);

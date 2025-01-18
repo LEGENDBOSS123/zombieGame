@@ -16,6 +16,8 @@ var GraphicsEngine = class {
             canvas: options?.canvas ?? null
         });
 
+        this.canvas = this.renderer.domElement;
+
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
         this.renderer.toneMappingExposure = 1;
         this.renderer.physicallyCorrectLights = true;

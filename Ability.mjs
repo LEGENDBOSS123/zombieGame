@@ -1,7 +1,3 @@
-import Vector3 from "./3D/Physics/Math3D/Vector3.mjs";
-import Sphere from "./3D/Physics/Shapes/Sphere.mjs";
-import Slime from "./Slime.mjs";
-
 var Ability = class {
     constructor(options) {
         this.name = options?.name ?? "ABILITY";
@@ -10,15 +6,15 @@ var Ability = class {
         this.holdingTimeoutID = options?.holdingIntervalID ?? null;
         this.maxHoldTime = options?.maxHoldTime ?? 0;
 
+        
         this.document = options.document;
         this.graphicsEngine = options.graphicsEngine;
         this.world = options.world;
         this.reloadTime = options?.reloadTime ?? 0;
         this.lastUsedTime = options?.lastUsedTime ?? 0;
 
-        options.document.addEventListener("mousedown", this._onMouseDown.bind(this));
-
-        options.document.addEventListener("mouseup", this._onMouseUp.bind(this));
+        this.graphicsEngine.canvas.addEventListener("mousedown", this._onMouseDown.bind(this));
+        this.graphicsEngine.canvas.addEventListener("mouseup", this._onMouseUp.bind(this));
 
         this.html = null;
         this.createHTML();

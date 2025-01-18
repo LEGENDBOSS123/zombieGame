@@ -34,6 +34,7 @@ var Slime = class extends HealthUnit {
                 return;
             }
             //targetBody.children[0].toBeRemoved = true;
+            targetBody
         }
         this.spherePostCollision = function (contact) {
             if (contact.body1.maxParent == this.sphere) {
@@ -88,6 +89,7 @@ var Slime = class extends HealthUnit {
             })
             this.sphere.mesh = graphicsEngine.meshLinker.createMeshData(gltf.scene);
             this.addToScene(graphicsEngine.scene);
+            this.makeHealthSprite(this.sphere.mesh, new Vector3(3,0.2,0), new Vector3(0, 2, 0));
         }.bind(this));
     }
 

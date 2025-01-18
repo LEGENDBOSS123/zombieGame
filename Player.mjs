@@ -70,23 +70,23 @@ var Player = class extends HealthUnit {
                 }
             }
         }.bind(this);
-        
+
         this.postStepCallback = function () {
             var vel = this.composite.global.body.getVelocity();
             var velXZ = new Vector3(vel.x, 0, vel.z);
-            if(this.composite.mesh){
+            if (this.composite.mesh) {
                 this.composite.mesh.animations.actions[0].timeScale = 1;
                 this.composite.mesh.animations.actions[0].timeScale = velXZ.magnitude() * 5;
             }
-            if(velXZ.magnitudeSquared() < 0.005){
-                if(this.composite.mesh){
+            if (velXZ.magnitudeSquared() < 0.005) {
+                if (this.composite.mesh) {
                     //this.composite.mesh.animations.actions[0].timeScale = 0;
                 }
                 return;
             }
-            
+
             this.composite.global.body.rotation = Quaternion.lookAt(velXZ.normalize(), new Vector3(0, 1, 0));
-            
+
         }.bind(this);
         this.spheres[0].addEventListener("postCollision", this.jumpPostCollision);
         this.composite.addEventListener("postStep", this.postStepCallback);
@@ -111,7 +111,7 @@ var Player = class extends HealthUnit {
         graphicsEngine.load("player2.glb", function (gltf) {
             gltf.scene.scale.set(...(new Vector3(0.02, 0.02, 0.02).scale(this.spheres[0].radius)));
             top.gltf = gltf;
-            for(var e of gltf.scene.children){
+            for (var e of gltf.scene.children) {
                 e.position.y -= 100;
             }
             gltf.scene.traverse(function (child) {
@@ -124,10 +124,15 @@ var Player = class extends HealthUnit {
             this.composite.mesh = meshData;
             meshData.animations.actions[0].play();
             this.addToScene(graphicsEngine.scene);
+            this.makeHealthSprite(this.composite.mesh, new Vector3(100,10,0), new Vector3(0, 100, 0));
         }.bind(this));
         // this.spheres.forEach(sphere => {
         //     sphere.setMeshAndAddToScene({}, graphicsEngine);
         // });
+    }
+
+    update(){
+        
     }
 
     respawn() {

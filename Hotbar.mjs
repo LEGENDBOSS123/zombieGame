@@ -11,30 +11,33 @@ var Hotbar = class {
 
     _onKeyDown(event) {
         if(parseInt(event.key) >= 1 && parseInt(event.key) <= 9){
-            var activeSlot = parseInt(event.key) - 1;
-            if(this.slots[this.activeSlot] != null){
-                if(this.slots[this.activeSlot].holding == true){
-                    return;
-                }
-            }
-            
-            if(this.activeSlot == activeSlot){
-                if(this.slots[activeSlot]){
-                    this.slots[activeSlot].active = false;
-                }
-                this.activeSlot = null;
-            }
-            else{
-                if(this.slots[activeSlot]){
-                    this.slots[activeSlot].active = true;
-                }
-                if(this.slots[this.activeSlot]){
-                    this.slots[this.activeSlot].active = false;
-                }
-                this.activeSlot = activeSlot;
-            }
-            this.update();
+            this.switchSlot(parseInt(event.key) - 1);
         }
+    }
+
+    switchSlot(activeSlot){
+        if(this.slots[this.activeSlot] != null){
+            if(this.slots[this.activeSlot].holding == true){
+                return;
+            }
+        }
+        
+        if(this.activeSlot == activeSlot){
+            if(this.slots[activeSlot]){
+                this.slots[activeSlot].active = false;
+            }
+            this.activeSlot = null;
+        }
+        else{
+            if(this.slots[activeSlot]){
+                this.slots[activeSlot].active = true;
+            }
+            if(this.slots[this.activeSlot]){
+                this.slots[this.activeSlot].active = false;
+            }
+            this.activeSlot = activeSlot;
+        }
+        this.update();
     }
 
     addAbility(ability, slot){
@@ -68,7 +71,6 @@ var Hotbar = class {
         var aspectRatio = options.aspectRatio ?? 1;
         container.innerHTML = '';
 
-        // Set the container's style for the hotbar
         container.style.display = 'flex';
         container.style.justifyContent = 'space-between';
         container.style.gap = '5px';
@@ -76,8 +78,8 @@ var Hotbar = class {
         container.style.border = '1px solid black';
         container.style.boxSizing = 'border-box';
 
-        // Create N elements and append them to the container
         for (let i = 0; i < this.slotSize; i++) {
+            const index = i;
             const hotbarItemContainer = document.createElement('div');
             hotbarItemContainer.style.flex = '1 1 0';
             hotbarItemContainer.style.display = 'flex';
@@ -119,6 +121,9 @@ var Hotbar = class {
             hotbarItem.appendChild(hotbarNumber);
             container.appendChild(hotbarItemContainer);
             
+            hotbarItem.addEventListener("click", function(){
+                this.switchSlot(index);
+            }.bind(this));
             this.hotbarItems[i] = hotbarItem;
         }
     }

@@ -4,6 +4,7 @@ var HealthUnit = class {
     constructor(options) {
         this.maxHealth = options?.maxHealth ?? 100;
         this.health = options?.health ?? this.maxHealth;
+        this.isHealthUnit = true;
     }
 
     updateHealthTexture(model, graphicsEngine) {

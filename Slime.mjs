@@ -34,7 +34,6 @@ var Slime = class extends HealthUnit {
                 return;
             }
             //targetBody.children[0].toBeRemoved = true;
-            targetBody
         }
         this.spherePostCollision = function (contact) {
             if (contact.body1.maxParent == this.sphere) {

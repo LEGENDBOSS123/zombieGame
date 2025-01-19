@@ -4,6 +4,7 @@ var Entity = class {
         this.id = options?.id ?? -1;
         this.entitySystem = options?.entitySystem ?? null;
         this.oldShape = options?.oldShape ?? null;
+        this.isEntity = true;
     }
 
     updateShapeID(shape) {

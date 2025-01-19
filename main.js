@@ -301,14 +301,16 @@ ability3.onActivate = function (timeHeld) {
     sphere.addToWorld(this.world);
     sphere.addEventListener("postCollision", function (contact) {
         if(contact.body1.maxParent.id == sphere.maxParent.id){
-            if(entitySystem.getEntityFromShape(contact.body2)){
+            if(entitySystem.getEntityFromShape(contact.body2)?.isHealthUnit){
                 sphere.toBeRemoved = true;
+                entitySystem.getEntityFromShape(contact.body2).health -= 10;
                 return;
             }
         }
         if(contact.body2.maxParent.id == sphere.maxParent.id){
-            if(entitySystem.getEntityFromShape(contact.body1)){
+            if(entitySystem.getEntityFromShape(contact.body1)?.isHealthUnit){
                 sphere.toBeRemoved = true;
+                entitySystem.getEntityFromShape(contact.body1).health -= 10;
                 return;
             }
         }

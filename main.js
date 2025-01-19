@@ -339,6 +339,7 @@ setInterval(function () {
 
 
 var s = slimeSpawner.spawnSlime(Slime, world, graphicsEngine);
+s.getMainShape().global.body.setPosition(s.getMainShape().global.body.position.add(new Vector3(-50, 0, -50)));
 targets.unshift(new Target({
     followID: s.id,
     threatLevel: Infinity
@@ -477,7 +478,7 @@ function render() {
 
 
     graphicsEngine.update(previousWorld || world, world, lerpAmount);
-    
+
     gameCamera.update(Vector3.from(player.getMainShape()?.mesh?.mesh?.position));
     graphicsEngine.render();
     requestAnimationFrame(render);

@@ -123,11 +123,12 @@ var Slime = class extends HealthEntity{
         var direction = targetBody.global.body.position.subtract(this.sphere.global.body.position);
         
         direction.y = 0;
-        direction.normalizeInPlace().scaleInPlace(this.speed);
-        direction.y = this.jumpPower;
-        if(direction.magnitudeSquared() > 0.01) {
+        if(direction.magnitudeSquared() > 0.001) {
             this.sphere.global.body.rotation = Quaternion.lookAt(direction, new Vector3(0, 1, 0));
         }
+        direction.normalizeInPlace().scaleInPlace(this.speed);
+        direction.y = this.jumpPower;
+        
         
         
         if(this.jumpCooldown != this.maxJumpCooldown){

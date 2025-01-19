@@ -33,7 +33,7 @@ var Slime = class extends HealthUnit {
                 this.target = null;
                 return;
             }
-            //targetBody.children[0].toBeRemoved = true;
+            top.player.health--;
         }
         this.spherePostCollision = function (contact) {
             if (contact.body1.maxParent == this.sphere) {

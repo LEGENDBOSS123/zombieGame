@@ -59,11 +59,11 @@ var SimpleCameraControls = class {
             if (!this.camera) {
                 return;
             }
-            if(this.rotateMethods.drag && this.isDragging){
+            if (this.rotateMethods.drag && this.isDragging) {
                 this.camera.rotateX(e.movementX * this.rotateSensitivity.drag);
                 this.camera.rotateY(-e.movementY * this.rotateSensitivity.drag);
             }
-            else if(this.rotateMethods.shiftLock && this.shiftLocked){
+            else if (this.rotateMethods.shiftLock && this.shiftLocked) {
                 this.camera.rotateX(e.movementX * this.rotateSensitivity.shiftLock);
                 this.camera.rotateY(-e.movementY * this.rotateSensitivity.shiftLock);
             }

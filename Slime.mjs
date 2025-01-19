@@ -3,7 +3,7 @@ import HealthEntity from "./HealthEntity.mjs";
 import Vector3 from "./3D/Physics/Math3D/Vector3.mjs";
 import Quaternion from "./3D/Physics/Math3D/Quaternion.mjs";
 
-var Slime = class extends HealthEntity{
+var Slime = class extends HealthEntity {
     constructor(options) {
         super(options);
         this.damage = options?.damage ?? 10;
@@ -26,11 +26,11 @@ var Slime = class extends HealthEntity{
         this.sphere.collisionMask = this.sphere.setBitMask(this.sphere.collisionMask, "S", true);
         this.target = null;
         this.sphere.calculateLocalHitbox();
-        this.handleTargetHit = function(target){
+        this.handleTargetHit = function (target) {
             var world = this.sphere.world;
             var targetEntity = this.entitySystem.getByID(target.followID);
             var targetBody = targetEntity.getMainShape();
-            if(!targetBody){
+            if (!targetBody) {
                 this.target = null;
                 return;
             }
@@ -40,25 +40,25 @@ var Slime = class extends HealthEntity{
         this.spherePostCollision = function (contact) {
             var targetShapeID = this.entitySystem.getByID(this.target?.followID)?.getMainShape()?.id;
             if (contact.body1.maxParent == this.sphere) {
-                if(this.target){
-                    if(contact.body2.maxParent.id == targetShapeID){
+                if (this.target) {
+                    if (contact.body2.maxParent.id == targetShapeID) {
                         this.handleTargetHit(this.target);
                     }
                 }
                 if (contact.normal.dot(new Vector3(0, 1, 0)) > 0.75) {
-                    if(this.jumpCooldown <= 0){
+                    if (this.jumpCooldown <= 0) {
                         this.jumpCooldown = this.maxJumpCooldown;
                     }
                 }
             }
             else {
-                if(this.target){
-                    if(contact.body1.maxParent.id == targetShapeID){
+                if (this.target) {
+                    if (contact.body1.maxParent.id == targetShapeID) {
                         this.handleTargetHit(this.target);
                     }
                 }
                 if (contact.normal.dot(new Vector3(0, -1, 0)) > 0.75) {
-                    if(this.jumpCooldown <= 0){
+                    if (this.jumpCooldown <= 0) {
                         this.jumpCooldown = this.maxJumpCooldown;
                     }
                 }
@@ -82,7 +82,7 @@ var Slime = class extends HealthEntity{
     }
 
     setMeshAndAddToScene(options, graphicsEngine) {
-        graphicsEngine.load("slime.glb", function(gltf){
+        graphicsEngine.load("slime.glb", function (gltf) {
             gltf.scene.scale.set(this.sphere.radius, this.sphere.radius, this.sphere.radius);
             gltf.scene.traverse(function (child) {
                 if (child.isMesh) {
@@ -92,7 +92,7 @@ var Slime = class extends HealthEntity{
             })
             this.sphere.mesh = graphicsEngine.meshLinker.createMeshData(gltf.scene);
             this.addToScene(graphicsEngine.scene);
-            this.makeHealthSprite(this.sphere.mesh, new Vector3(3,0.2,0), new Vector3(0, 2, 0));
+            this.makeHealthSprite(this.sphere.mesh, new Vector3(3, 0.2, 0), new Vector3(0, 2, 0));
         }.bind(this));
     }
 
@@ -100,16 +100,16 @@ var Slime = class extends HealthEntity{
         if (targets.length == 0) {
             return null;
         }
-        for(var i of targets){
+        for (var i of targets) {
             var target = this.entitySystem.getByID(i.followID);
-            if(target.health < 0){
+            if (target.health < 0) {
                 continue;
             }
             return i;
         }
     }
 
-    update(targets, world) {
+    update(targets) {
         var target = this.findTarget(targets);
         if (!target) {
             return;
@@ -121,23 +121,23 @@ var Slime = class extends HealthEntity{
             return;
         }
         var direction = targetBody.global.body.position.subtract(this.sphere.global.body.position);
-        
+
         direction.y = 0;
-        if(direction.magnitudeSquared() > 0.001) {
+        if (direction.magnitudeSquared() > 0.001) {
             this.sphere.global.body.rotation = Quaternion.lookAt(direction, new Vector3(0, 1, 0));
         }
         direction.normalizeInPlace().scaleInPlace(this.speed);
         direction.y = this.jumpPower;
-        
-        
-        
-        if(this.jumpCooldown != this.maxJumpCooldown){
+
+
+
+        if (this.jumpCooldown != this.maxJumpCooldown) {
             this.jumpCooldown -= 1;
             return;
         }
         this.sphere.applyForce(direction);
         this.jumpCooldown -= 1;
-        
+
     }
 
     toJSON() {
@@ -178,7 +178,7 @@ var Slime = class extends HealthEntity{
         this.sphere.addEventListener("delete", this.onDelete);
     }
 
-    getMainShape(){
+    getMainShape() {
         return this.sphere;
     }
 }

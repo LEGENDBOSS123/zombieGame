@@ -11,7 +11,7 @@ var rgbeLoader = new RGBELoader();
 
 
 var TextureLoader = class {
-    constructor(options){
+    constructor(options) {
         this.loaders = {
 
         }

@@ -75,7 +75,7 @@ var PhysicsBody3 = class {
         deltaAngularVelocity.addInPlace(this.angularAcceleration.scale(world.deltaTimeSquared * 0.5));
         if (this.netTorque.magnitudeSquared() > 0) {
             deltaAngularVelocity.addInPlace(this.inverseMomentOfInertia.multiplyVector3(this.netTorque));
-            
+
         }
         this.angularVelocity.addInPlace(deltaAngularVelocity.scale(1 - this.angularDamping));
         this.angularVelocity.scaleInPlace(1 - this.angularDamping);

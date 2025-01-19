@@ -299,9 +299,21 @@ ability3.onActivate = function (timeHeld) {
     sphere.setRestitution(5);
     sphere.setFriction(1);
     sphere.addToWorld(this.world);
-    entitySystem.register(slime);
     sphere.addEventListener("postCollision", function (contact) {
-        //sphere.toBeRemoved = true;
+        if(contact.body1.maxParent.id == sphere.maxParent.id){
+            if(entitySystem.getEntityFromShape(contact.body2)){
+                sphere.toBeRemoved = true;
+                return;
+            }
+        }
+        if(contact.body2.maxParent.id == sphere.maxParent.id){
+            if(entitySystem.getEntityFromShape(contact.body1)){
+                sphere.toBeRemoved = true;
+                return;
+            }
+        }
+        
+        
     });
     sphere.collisionMask = 0;
     sphere.collisionMask = sphere.setBitMask(sphere.collisionMask, "B", true);

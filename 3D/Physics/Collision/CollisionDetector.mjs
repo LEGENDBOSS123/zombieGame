@@ -99,18 +99,18 @@ var CollisionDetector = class {
 
     resolveAllContacts() {
         var maxParentMap = new Object(null);
-        
+
         for (var i = 0; i < this.contacts.length; i++) {
             var contact = this.contacts[i];
             if (!maxParentMap[contact.body1.maxParent.id]) {
-                maxParentMap[contact.body1.maxParent.id] =  { penetrationSum: 0, contacts: [] };
+                maxParentMap[contact.body1.maxParent.id] = { penetrationSum: 0, contacts: [] };
             }
 
             if (!maxParentMap[contact.body2.maxParent.id]) {
                 maxParentMap[contact.body2.maxParent.id] = { penetrationSum: 0, contacts: [] };
             }
             contact.material = contact.body1.material.getCombined(contact.body2.material);
-            if(contact.body1.isSensor || contact.body2.isSensor) {
+            if (contact.body1.isSensor || contact.body2.isSensor) {
                 contact.penetration = new Vector3();
                 contact.impulse = new Vector3();
                 contact.solved = true;
@@ -123,7 +123,7 @@ var CollisionDetector = class {
             contacts.push(contact);
             body1Map.penetrationSum += contact.penetration.magnitudeSquared();
 
-            
+
             contacts = body2Map.contacts;
             contacts.push(contact);
             body2Map.penetrationSum += contact.penetration.magnitudeSquared();
@@ -164,7 +164,7 @@ var CollisionDetector = class {
                 contact.body2.translate(totalTranslation);
             }
         }
-        
+
         for (var key in maxParentMap) {
             var value = maxParentMap[key];
             for (var i = 0; i < value.contacts.length; i++) {

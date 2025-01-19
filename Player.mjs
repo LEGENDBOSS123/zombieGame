@@ -126,15 +126,15 @@ var Player = class extends HealthEntity {
             this.composite.mesh = meshData;
             meshData.animations.actions[0].play();
             this.addToScene(graphicsEngine.scene);
-            this.makeHealthSprite(this.composite.mesh, new Vector3(100,10,0), new Vector3(0, 100, 0));
+            this.makeHealthSprite(this.composite.mesh, new Vector3(100, 10, 0), new Vector3(0, 100, 0));
         }.bind(this));
         // this.spheres.forEach(sphere => {
         //     sphere.setMeshAndAddToScene({}, graphicsEngine);
         // });
     }
 
-    update(){
-        
+    update() {
+
     }
 
     respawn() {

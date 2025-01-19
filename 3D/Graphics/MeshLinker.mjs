@@ -4,7 +4,7 @@ var MeshLinker = class {
         this.meshes = {};
     }
 
-    createMeshData(mesh, animations = []){
+    createMeshData(mesh, animations = []) {
         return {
             mesh: mesh,
             animations: animations,

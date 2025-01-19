@@ -9,7 +9,7 @@ var Vector3 = class {
         return this.x == v.x && this.y == v.y && this.z == v.z;
     }
 
-    clamp(min, max){
+    clamp(min, max) {
         return new this.constructor(Math.max(min.x, Math.min(max.x, this.x)), Math.max(min.y, Math.min(max.y, this.y)), Math.max(min.z, Math.min(max.z, this.z)));
     }
 

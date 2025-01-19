@@ -60,7 +60,7 @@ var Composite = class {
     }
 
 
-    setBitMask(mask, letter, value){
+    setBitMask(mask, letter, value) {
         var position = letter.charCodeAt(0) - "A".charCodeAt(0);
         if (value) {
             return mask |= 1 << position;
@@ -69,7 +69,7 @@ var Composite = class {
     }
 
     getEffectiveTotalMass() {
-        if(this.isImmovable()){
+        if (this.isImmovable()) {
             return Infinity;
         }
         return this.global.body.mass * (1 - this.global.body.linearDamping);
@@ -219,7 +219,7 @@ var Composite = class {
         if (other.maxParent == this.maxParent) {
             return false;
         }
-        if((this.collisionMask & other.canCollideWithMask) == 0 || (this.canCollideWithMask & other.collisionMask) == 0) {
+        if ((this.collisionMask & other.canCollideWithMask) == 0 || (this.canCollideWithMask & other.collisionMask) == 0) {
             return false;
         }
         if (this.maxParent.isImmovable() && other.maxParent.isImmovable()) {
@@ -229,7 +229,7 @@ var Composite = class {
     }
 
     translate(v) {
-        if(this.maxParent.isImmovable()) {
+        if (this.maxParent.isImmovable()) {
             return;
         }
         if (this.isMaxParent()) {

@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import Entity from "./Entity.mjs";
 
-var HealthUnit = class extends Entity{
+var HealthUnit = class extends Entity {
     constructor(options) {
         super(options);
         this.maxHealth = options?.maxHealth ?? 100;
@@ -16,7 +16,7 @@ var HealthUnit = class extends Entity{
         model = model.mesh;
         var healthCanvas = model.healthInfo.canvas;
         var ctx = model.healthInfo.context;
-        
+
         var texture = model.healthInfo.texture;
         var sprite = model.healthInfo.sprite;
         ctx.clearRect(0, 0, healthCanvas.width, healthCanvas.height);
@@ -38,7 +38,7 @@ var HealthUnit = class extends Entity{
         canv.width = 100;
         canv.height = 100;
         var ctx = canv.getContext("2d");
-        
+
         var texture = new THREE.CanvasTexture(canv);
         texture.minFilter = THREE.NearestFilter;
         texture.magFilter = THREE.NearestFilter;

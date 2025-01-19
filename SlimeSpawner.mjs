@@ -70,7 +70,7 @@ var SlimeSpawner = class extends Entity {
         slime.setMeshAndAddToScene({}, graphicsEngine);
         return slime;
     }
-    getMainShape(){
+    getMainShape() {
         return this.sphere;
     }
 }

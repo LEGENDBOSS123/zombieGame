@@ -6,7 +6,7 @@ var Ability = class {
         this.holdingTimeoutID = options?.holdingIntervalID ?? null;
         this.maxHoldTime = options?.maxHoldTime ?? 0;
 
-        
+
         this.document = options.document;
         this.graphicsEngine = options.graphicsEngine;
         this.world = options.world;

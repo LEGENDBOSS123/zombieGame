@@ -5,7 +5,7 @@ var EntitySystem = class {
         this.shapeLookup = options?.shapeLookup ?? {};
     }
 
-    getByID(id){
+    getByID(id) {
         return this.all[id];
     }
 

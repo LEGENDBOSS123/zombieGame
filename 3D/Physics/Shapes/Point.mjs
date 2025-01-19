@@ -25,12 +25,12 @@ var Point = class extends Composite {
         this.mesh = graphicsEngine.meshLinker.createMeshData(new graphicsEngine.THREE.Mesh(geometry, options?.material ?? new graphicsEngine.THREE.MeshPhongMaterial({ color: 0x00ff00, wireframe: true })));
     }
 
-    toJSON(){
+    toJSON() {
         var composite = super.toJSON();
         return composite;
     }
 
-    static fromJSON(json, world){
+    static fromJSON(json, world) {
         var point = new this(new Composite(json));
         return box;
     }

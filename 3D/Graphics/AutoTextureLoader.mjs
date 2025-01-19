@@ -9,7 +9,7 @@ import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 
 
 var AutoTextureLoader = class {
-    constructor(options){
+    constructor(options) {
         this.specialLoaders = {
             "glb": GLTFLoader,
             "gltf": GLTFLoader,
@@ -18,15 +18,15 @@ var AutoTextureLoader = class {
         }
     }
 
-    load(url, onLoad, onProgress, onError){
+    load(url, onLoad, onProgress, onError) {
         var extension = url.split('.').pop().toLowerCase();
-        if(this.specialLoaders[extension]){
+        if (this.specialLoaders[extension]) {
             var loader = new this.specialLoaders[extension];
-            return loader.load(url, function(texture){
+            return loader.load(url, function (texture) {
                 onLoad?.(texture, extension);
             }, onProgress, onError);
         }
-        return new THREE.TextureLoader().load(url, function(texture){
+        return new THREE.TextureLoader().load(url, function (texture) {
             onLoad?.(texture, extension);
         }, onProgress, onError);
     }

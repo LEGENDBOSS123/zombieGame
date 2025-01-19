@@ -43,16 +43,16 @@ var Contact = class {
         var rotationalEffects2Fric = tangentialNorm.dot(this.body2.maxParent.global.body.inverseMomentOfInertia.multiplyVector3(radius2.cross(tangentialNorm)).cross(radius2));
         rotationalEffects1Fric = isFinite(rotationalEffects1Fric) ? rotationalEffects1Fric : 0;
         rotationalEffects2Fric = isFinite(rotationalEffects2Fric) ? rotationalEffects2Fric : 0;
-        
+
         var invMass1 = this.body1.maxParent.global.body.inverseMass;
         var invMass2 = this.body2.maxParent.global.body.inverseMass;
 
-        if(this.body1.maxParent.isImmovable()){
+        if (this.body1.maxParent.isImmovable()) {
             invMass1 = 0;
             rotationalEffects1 = 0;
             rotationalEffects1Fric = 0;
         }
-        if(this.body2.maxParent.isImmovable()){
+        if (this.body2.maxParent.isImmovable()) {
             invMass2 = 0;
             rotationalEffects2 = 0;
             rotationalEffects2Fric = 0;
@@ -64,19 +64,19 @@ var Contact = class {
         var denominatorFric = invMass1 * (1 - this.body1.maxParent.global.body.linearDamping.multiply(tangentialNorm).magnitude()) + rotationalEffects1Fric * (1 - this.body1.maxParent.global.body.angularDamping);
 
         denominatorFric += invMass2 * (1 - this.body2.maxParent.global.body.linearDamping.multiply(tangentialNorm).magnitude()) + rotationalEffects2Fric * (1 - this.body2.maxParent.global.body.angularDamping);
-        if(denominator == 0){
-            this.impulse = new Vector3(0,0,0);
+        if (denominator == 0) {
+            this.impulse = new Vector3(0, 0, 0);
             this.solved = true;
             return;
         }
 
         var impulse = - (1 + restitution) * impactSpeed / denominator;
-       
+
         if (impulse < 0) {
             impulse = 0;
         }
 
-        
+
         var maxFriction = tangential.magnitude() / denominatorFric;
         tangential.normalizeInPlace();
         var friction = impulse * this.material.friction;

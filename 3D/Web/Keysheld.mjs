@@ -3,10 +3,10 @@ var Keysheld = class {
     constructor(element) {
         this.keysheld = {};
 
-        element.addEventListener('keydown', function(e){
+        element.addEventListener('keydown', function (e) {
             this.keysheld[e.code] = true;
         }.bind(this));
-        element.addEventListener('keyup', function(e){
+        element.addEventListener('keyup', function (e) {
             this.keysheld[e.code] = false;
         }.bind(this));
     }

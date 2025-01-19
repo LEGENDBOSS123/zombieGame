@@ -76,10 +76,10 @@ var GraphicsEngine = class {
 
     }
 
-    raycastFirst(){
+    raycastFirst() {
         this.raycaster.setFromCamera(this.mousePosition, this.camera);
         var intesections = this.raycaster.intersectObjects(this.scene.children, true);
-        if(intesections.length > 0){
+        if (intesections.length > 0) {
             return intesections[0];
         }
         return null;
@@ -88,7 +88,7 @@ var GraphicsEngine = class {
     set cameraFar(far) {
         this.camera.far = far;
     }
-    
+
     get cameraFar() {
         return this.camera.far;
     }
@@ -104,15 +104,15 @@ var GraphicsEngine = class {
         return this.screenWidth / this.screenHeight;
     }
 
-    update(previousWorld, world, lerpAmount){
+    update(previousWorld, world, lerpAmount) {
         if (!this.startTime) {
             this.startTime = performance.now();
         }
         this.meshLinker.update(previousWorld, world, lerpAmount);
     }
     render() {
-        for(var mixer of this.mixers){
-            mixer.update(16/1000)
+        for (var mixer of this.mixers) {
+            mixer.update(16 / 1000)
         }
         this.sunlight.position.copy(this.camera.position);
         this.sunlight.position.sub(this.sunlight.direction.clone().multiplyScalar(this.sunlight.shadow.camera.far * 0.5));
@@ -122,10 +122,10 @@ var GraphicsEngine = class {
         this.composer.render();
     }
 
-    createAnimations(model, animations){
+    createAnimations(model, animations) {
         var mixer = new this.THREE.AnimationMixer(model);
         var actions = [];
-        for(var animation of animations){
+        for (var animation of animations) {
             actions.push(mixer.clipAction(animation));
         }
         this.mixers.push(mixer);

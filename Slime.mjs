@@ -1,9 +1,9 @@
 import Sphere from "./3D/Physics/Shapes/Sphere.mjs";
-import HealthUnit from "./HealthUnit.mjs";
+import HealthEntity from "./HealthEntity.mjs";
 import Vector3 from "./3D/Physics/Math3D/Vector3.mjs";
 import Quaternion from "./3D/Physics/Math3D/Quaternion.mjs";
 
-var Slime = class extends HealthUnit {
+var Slime = class extends HealthEntity{
     constructor(options) {
         super(options);
         this.damage = options?.damage ?? 10;
@@ -28,17 +28,20 @@ var Slime = class extends HealthUnit {
         this.sphere.calculateLocalHitbox();
         this.handleTargetHit = function(target){
             var world = this.sphere.world;
-            var targetBody = world.getByID(target.followID);
+            var targetEntity = this.entitySystem.getByID(target.followID);
+            var targetBody = targetEntity.getMainShape();
             if(!targetBody){
                 this.target = null;
                 return;
             }
-            top.player.health--;
-        }
+            var e = targetEntity;
+            e.health--;
+        }.bind(this);
         this.spherePostCollision = function (contact) {
+            var targetShapeID = this.entitySystem.getByID(this.target?.followID)?.getMainShape()?.id;
             if (contact.body1.maxParent == this.sphere) {
                 if(this.target){
-                    if(contact.body2.maxParent.id == this.target.followID){
+                    if(contact.body2.maxParent.id == targetShapeID){
                         this.handleTargetHit(this.target);
                     }
                 }
@@ -50,7 +53,7 @@ var Slime = class extends HealthUnit {
             }
             else {
                 if(this.target){
-                    if(contact.body1.maxParent.id == this.target.followID){
+                    if(contact.body1.maxParent.id == targetShapeID){
                         this.handleTargetHit(this.target);
                     }
                 }
@@ -66,7 +69,7 @@ var Slime = class extends HealthUnit {
         }.bind(this);
         this.sphere.addEventListener("postCollision", this.spherePostCollision);
         this.sphere.addEventListener("delete", this.onDelete);
-        
+        this.updateShapeID(this.sphere);
     }
 
     addToScene(scene) {
@@ -75,6 +78,7 @@ var Slime = class extends HealthUnit {
 
     addToWorld(world) {
         world.addComposite(this.sphere);
+        this.updateShapeID(this.sphere);
     }
 
     setMeshAndAddToScene(options, graphicsEngine) {
@@ -92,28 +96,39 @@ var Slime = class extends HealthUnit {
         }.bind(this));
     }
 
-    findTarget(targets, world) {
+    findTarget(targets) {
         if (targets.length == 0) {
             return null;
         }
-        return targets[0];
+        for(var i of targets){
+            var target = this.entitySystem.getByID(i.followID);
+            if(target.health < 0){
+                continue;
+            }
+            return i;
+        }
     }
 
     update(targets, world) {
-        var target = this.findTarget(targets, world);
+        var target = this.findTarget(targets);
         if (!target) {
             return;
         }
         this.target = target;
-        var targetBody = world.getByID(target.followID);
+        var targetEntity = this.entitySystem.getByID(target.followID);
+        var targetBody = targetEntity.getMainShape();
         if (!targetBody) {
             return;
         }
         var direction = targetBody.global.body.position.subtract(this.sphere.global.body.position);
+        
         direction.y = 0;
         direction.normalizeInPlace().scaleInPlace(this.speed);
         direction.y = this.jumpPower;
-        this.sphere.global.body.rotation = Quaternion.lookAt(direction, new Vector3(0, 1, 0));
+        if(direction.magnitudeSquared() > 0.01) {
+            this.sphere.global.body.rotation = Quaternion.lookAt(direction, new Vector3(0, 1, 0));
+        }
+        
         
         if(this.jumpCooldown != this.maxJumpCooldown){
             this.jumpCooldown -= 1;
@@ -160,6 +175,10 @@ var Slime = class extends HealthUnit {
         this.sphere = world.getByID(this.sphere);
         this.sphere.addEventListener("postCollision", this.spherePostCollision);
         this.sphere.addEventListener("delete", this.onDelete);
+    }
+
+    getMainShape(){
+        return this.sphere;
     }
 }
 

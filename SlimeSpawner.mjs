@@ -1,8 +1,10 @@
 import Sphere from "./3D/Physics/Shapes/Sphere.mjs";
 import Composite from "./3D/Physics/Shapes/Composite.mjs";
 import Vector3 from "./3D/Physics/Math3D/Vector3.mjs";
-var SlimeSpawner = class {
+import Entity from "./Entity.mjs";
+var SlimeSpawner = class extends Entity {
     constructor(options) {
+        super(options);
         this.sphere = new Sphere(options?.sphere);
         this.sphere.radius = 15;
         this.sphere.local.body.mass = Infinity;
@@ -11,6 +13,7 @@ var SlimeSpawner = class {
         this.sphere.setLocalFlag(Composite.FLAGS.STATIC, true);
         this.sphere.setRestitution(0);
         this.sphere.setFriction(0);
+        this.updateShapeID(this.sphere);
     }
 
     addToScene(scene) {
@@ -19,6 +22,7 @@ var SlimeSpawner = class {
 
     addToWorld(world) {
         world.addComposite(this.sphere);
+        this.updateShapeID(this.sphere);
     }
 
     setMeshAndAddToScene(options, graphicsEngine) {
@@ -43,7 +47,7 @@ var SlimeSpawner = class {
     static fromJSON(json, world) {
         var slimeSpawner = new this();
         this.sphere = json.sphere;
-        return slimeeSpawner;
+        return slimeSpawner;
     }
 
     updateReferences(world) {
@@ -62,8 +66,12 @@ var SlimeSpawner = class {
             }
         });
         slime.addToWorld(world);
+        this.entitySystem.register(slime);
         slime.setMeshAndAddToScene({}, graphicsEngine);
         return slime;
+    }
+    getMainShape(){
+        return this.sphere;
     }
 }
 

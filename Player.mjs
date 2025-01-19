@@ -1,9 +1,9 @@
 import Composite from "./3D/Physics/Shapes/Composite.mjs";
 import Sphere from "./3D/Physics/Shapes/Sphere.mjs";
 import Vector3 from "./3D/Physics/Math3D/Vector3.mjs";
-import HealthUnit from "./HealthUnit.mjs";
+import HealthEntity from "./HealthEntity.mjs";
 import Quaternion from "./3D/Physics/Math3D/Quaternion.mjs";
-var Player = class extends HealthUnit {
+var Player = class extends HealthEntity {
     constructor(options) {
         super(options);
         var mass = options?.local?.body?.mass ?? 1;
@@ -90,6 +90,7 @@ var Player = class extends HealthUnit {
         }.bind(this);
         this.spheres[0].addEventListener("postCollision", this.jumpPostCollision);
         this.composite.addEventListener("postStep", this.postStepCallback);
+        this.updateShapeID(this.composite);
     }
 
     addToScene(scene) {
@@ -104,6 +105,7 @@ var Player = class extends HealthUnit {
         for (var sphere of this.spheres) {
             world.addComposite(sphere);
         }
+        this.updateShapeID(this.composite);
     }
 
     setMeshAndAddToScene(options, graphicsEngine) {
@@ -183,8 +185,8 @@ var Player = class extends HealthUnit {
         this.composite.addEventListener("postStep", this.postStepCallback);
     }
 
-    getMeshTargetPosition() {
-        return Vector3.from(this.composite?.mesh?.mesh?.position)
+    getMainShape() {
+        return this.composite;
     }
 }
 

@@ -30,7 +30,7 @@ import Target from "./Target.mjs";
 import Slime from "./Slime.mjs";
 import Ability from "./Ability.mjs";
 import Hotbar from "./Hotbar.mjs";
-
+import EntitySystem from "./EntitySystem.mjs";
 top.Ability = Ability;
 top.Box = Box;
 top.World = World;
@@ -122,6 +122,8 @@ window.addEventListener('keydown', function (e) {
 
 
 var world = new World();
+var entitySystem = new EntitySystem();
+
 top.world = world;
 top.setWorld = function (w) {
     window.player = window.player.toJSON();
@@ -136,9 +138,9 @@ world.graphicsEngine = graphicsEngine;
 var gravity = -0.2;
 
 var targets = [];
-top.slimes = [];
+var slimes = [];
 
-window.player = new Player({
+var player = new Player({
     radius: 1,
     moveStrength: new Vector3(0.2, 0.05, 0.2),
     jumpStrength: 0.75,
@@ -157,28 +159,13 @@ window.player = new Player({
     },
     graphicsEngine: graphicsEngine
 });
-//window.player = player;
-
-// graphicsEngine.load('3D/Graphics/Textures/metal_grate_rusty_1k.gltf/metal_grate_rusty_1k.gltf', function (gltf) {
-//     gltf.scene.traverse(function (child) {
-//         if (child.isMesh) {
-//             child.castShadow = true;
-//             child.receiveShadow = true;
-//         }
-//     })
-//     var scaleFactor = 4;
-//     player.spheres.forEach(function (e) {
-//         e.mesh = gltf.scene.clone();
-//         e.mesh.mesh.scale.set(player.composite.children[0].radius * scaleFactor, player.composite.children[0].radius * scaleFactor, player.composite.children[0].radius * scaleFactor);
-//         graphicsEngine.addToScene(e.mesh.mesh);
-//     })
-// });
-
+top.player = player;
 player.setMeshAndAddToScene({}, graphicsEngine);
 player.addToWorld(world);
+entitySystem.register(player);
 
 targets.push(new Target({
-    followID: player.composite.id,
+    followID: player.id,
     threatLevel: Infinity
 }))
 
@@ -224,8 +211,9 @@ ability1.onActivate = function (timeHeld) {
     // slime.setRestitution(0);
     // slime.setFriction(0.5);
     slime.addToWorld(this.world);
+    entitySystem.register(slime);
     slime.setMeshAndAddToScene({}, this.graphicsEngine);
-    top.slimes.push(slime);
+    slimes.push(slime);
 }
 hotbar.addAbility(ability1, 1);
 
@@ -262,8 +250,9 @@ ability2.onActivate = function (timeHeld) {
         radius: radius
     })
     slime.addToWorld(this.world);
+    entitySystem.register(slime);
     slime.setMeshAndAddToScene({}, this.graphicsEngine);
-    top.slimes.push(slime);
+    slimes.push(slime);
 }
 hotbar.addAbility(ability2);
 
@@ -310,6 +299,7 @@ ability3.onActivate = function (timeHeld) {
     sphere.setRestitution(5);
     sphere.setFriction(1);
     sphere.addToWorld(this.world);
+    entitySystem.register(slime);
     sphere.addEventListener("postCollision", function (contact) {
         //sphere.toBeRemoved = true;
     });
@@ -323,7 +313,7 @@ hotbar.addAbility(ability3);
 
 
 
-top.slimeSpawner = new SlimeSpawner({
+var slimeSpawner = new SlimeSpawner({
     sphere: {
         global: {
             body: {
@@ -333,18 +323,28 @@ top.slimeSpawner = new SlimeSpawner({
     }
 });
 slimeSpawner.setMeshAndAddToScene({}, graphicsEngine);
+entitySystem.register(slimeSpawner);
+
 slimeSpawner.addToWorld(world);
 for (var i = 0; i < 1; i++) {
     slimes.push(slimeSpawner.spawnSlime(Slime, world, graphicsEngine));
 }
 
 setInterval(function () {
-    if (slimes.length > 0) {
+    if (slimes.length > 3) {
         return;
     }
     slimes.push(slimeSpawner.spawnSlime(Slime, world, graphicsEngine));
 }, 1);
 
+
+var s = slimeSpawner.spawnSlime(Slime, world, graphicsEngine);
+targets.unshift(new Target({
+    followID: s.id,
+    threatLevel: Infinity
+}))
+slimes.push(s);
+top.s = s;
 for (var i = 0; i < 1; i++) {
     graphicsEngine.load('ground.glb', function (gltf) {
         gltf.scene.castShadow = true;
@@ -478,7 +478,7 @@ function render() {
 
     graphicsEngine.update(previousWorld || world, world, lerpAmount);
     
-    gameCamera.update(player.getMeshTargetPosition());
+    gameCamera.update(Vector3.from(player.getMainShape()?.mesh?.mesh?.position));
     graphicsEngine.render();
     requestAnimationFrame(render);
 

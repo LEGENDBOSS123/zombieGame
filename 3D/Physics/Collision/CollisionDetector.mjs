@@ -11,7 +11,7 @@ var CollisionDetector = class {
         this.world = options?.world ?? null;
         this.contacts = options?.contacts ?? [];
         this.handlers = {};
-        this.binarySearchDepth = options?.binarySearchDepth ?? 6;
+        this.binarySearchDepth = options?.binarySearchDepth ?? 8;
         this.initHandlers();
     }
 
@@ -137,7 +137,7 @@ var CollisionDetector = class {
                 var contact = value.contacts[i];
                 contact.solve();
                 var translation = contact.penetration;
-                var totalMass = contact.body1.maxParent.getEffectiveTotalMass() + contact.body2.maxParent.getEffectiveTotalMass();
+                var totalMass = contact.body1.maxParent.getEffectiveTotalMass(contact.normal) + contact.body2.maxParent.getEffectiveTotalMass(contact.normal);
                 if (key == contact.body1.maxParent.id) {
                     contact.body1.dispatchEvent("preCollision", [contact]);
                     var massRatio2 = contact.body2.maxParent.getEffectiveTotalMass() / totalMass;
@@ -376,10 +376,58 @@ var CollisionDetector = class {
         this.addContact(contact);
         return true;
     }
+    timeOfCollisionSphereSphere(p1, v1, r1, p2, v2, r2) {
+        // p1, p2: Position vectors of the spheres (objects with x, y, z properties)
+        // v1, v2: Velocity vectors of the spheres (objects with x, y, z properties)
+        // r1, r2: Radii of the spheres
+
+        // Relative position and velocity
+        const dp = {
+            x: p1.x - p2.x,
+            y: p1.y - p2.y,
+            z: p1.z - p2.z,
+        };
+
+        const dv = {
+            x: v1.x - v2.x,
+            y: v1.y - v2.y,
+            z: v1.z - v2.z,
+        };
+
+        // Coefficients of the quadratic equation at^2 + bt + c = 0
+        const a = dv.x * dv.x + dv.y * dv.y + dv.z * dv.z;
+        const b = 2 * (dp.x * dv.x + dp.y * dv.y + dp.z * dv.z);
+        const c = dp.x * dp.x + dp.y * dp.y + dp.z * dp.z - (r1 + r2) * (r1 + r2);
+
+        // Discriminant
+        const discriminant = b * b - 4 * a * c;
+
+        if (discriminant < 0) {
+            // No collision
+            return null;
+        } else {
+            // Calculate the two possible times of collision
+            const t1 = (-b - Math.sqrt(discriminant)) / (2 * a);
+            const t2 = (-b + Math.sqrt(discriminant)) / (2 * a);
+
+            // Return the smallest positive time of collision. If both are negative or t1 is negative and t2 is positive, return the positive one.
+            if (t1 >= 0 && t2 >= 0) {
+                return Math.min(t1, t2);
+            } else if (t1 >= 0) {
+                return t1;
+            } else if (t2 >= 0) {
+                return t2;
+            } else {
+                return null; // Both are negative, collision in the past.
+            }
+        }
+    }
+
+
 
 
     handleSphereSphere(sphere1, sphere2) {
-
+        var time = this.timeOfCollisionSphereSphere(sphere1.global.body.position, sphere1.global.body.getVelocity(), sphere1.radius, sphere2.global.body.position, sphere2.global.body.getVelocity(), sphere2.radius);
         var minT = 0;
         var maxT = 1;
         var binarySearch = function (t, getData = false) {
@@ -402,7 +450,7 @@ var CollisionDetector = class {
                 contact.penetration = contact.normal.scale(sphere1.radius + sphere2.radius - Math.sqrt(distanceSquared));
                 return contact;
             }
-            return distanceSquared - (sphere1.radius + sphere2.radius) * (sphere1.radius + sphere2.radius);
+            return Math.sqrt(distanceSquared) - (sphere1.radius + sphere2.radius);
         }.bind(this);
         var t = 1;
         for (var i = 0; i < this.binarySearchDepth; i++) {
@@ -416,6 +464,7 @@ var CollisionDetector = class {
         }
 
         t = maxT;
+        //console.log(t, time);
         var isColliding = binarySearch(t) < 0;
         if (!isColliding) {
             return false;

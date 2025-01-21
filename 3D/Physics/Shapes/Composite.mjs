@@ -68,11 +68,11 @@ var Composite = class {
         return mask &= ~(1 << position);
     }
 
-    getEffectiveTotalMass() {
+    getEffectiveTotalMass(normal = new Vector3(0, 1, 0)) {
         if (this.isImmovable()) {
             return Infinity;
         }
-        return this.global.body.mass * (1 - this.global.body.linearDamping);
+        return this.global.body.mass * 1 / (1 - this.global.body.linearDamping.multiply(normal).magnitude());
     }
 
     toggleBitMask(mask, letter) {
@@ -174,8 +174,8 @@ var Composite = class {
     }
 
     calculateGlobalHitbox() {
-        this.global.hitbox.min = this.local.hitbox.min.add(this.global.body.position);
-        this.global.hitbox.max = this.local.hitbox.max.add(this.global.body.position);
+        this.global.hitbox.min = this.local.hitbox.min.add(this.global.body.position).subtract(new Vector3(10,10,10));
+        this.global.hitbox.max = this.local.hitbox.max.add(this.global.body.position).add(new Vector3(10,10,10));
         return this.global.hitbox;
     }
 

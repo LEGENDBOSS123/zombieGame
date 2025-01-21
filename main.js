@@ -164,10 +164,10 @@ player.setMeshAndAddToScene({}, graphicsEngine);
 player.addToWorld(world);
 entitySystem.register(player);
 
-targets.push(new Target({
-    followID: player.id,
-    threatLevel: Infinity
-}))
+// targets.push(new Target({
+//     followID: player.id,
+//     threatLevel: Infinity
+// }))
 
 var ability1 = new Ability({
     document: document,
@@ -270,22 +270,25 @@ ability3.onActivate = function (timeHeld) {
         return;
     }
     // var radius = intersection.distance / 20;
-    var radius = 1;
+    var radius = 0.75;
     var point = Vector3.from(intersection.point);
     var normal = Vector3.from(intersection.face.normal);
     point.addInPlace(normal.scale(radius));
     var sphere = new Sphere({
         global: {
             body: {
-                position: player.composite.global.body.position.add(new Vector3(0, 2, 0)),
+                position: player.composite.global.body.position.add(new Vector3(0, -1, 0)),
                 acceleration: new Vector3(0, -0.2, 0),
             }
         },
         local: {
             body: {
-                mass: 1000
+                mass: 1
             }
         },
+        width: radius,
+        height: radius,
+        depth: radius,
         radius: radius
     })
     var direction = point.subtract(sphere.global.body.position);
@@ -295,21 +298,23 @@ ability3.onActivate = function (timeHeld) {
     if (addition.dot(direction) < 0) {
         addition = new Vector3(0, 0, 0);
     }
-    sphere.global.body.setVelocity(direction.scale(0.3).add(addition));
-    sphere.setRestitution(5);
-    sphere.setFriction(1);
+    sphere.global.body.setVelocity(direction.scale(1).add(addition));
+    sphere.setRestitution(-100);
+    sphere.setFriction(0);
     sphere.addToWorld(this.world);
     sphere.addEventListener("postCollision", function (contact) {
         if(contact.body1.maxParent.id == sphere.maxParent.id){
             if(entitySystem.getEntityFromShape(contact.body2)?.isHealthUnit){
-                sphere.toBeRemoved = true;
+                //sphere.toBeRemoved = true;
+                top.stopped = true;
                 entitySystem.getEntityFromShape(contact.body2).health -= 10;
                 return;
             }
         }
         if(contact.body2.maxParent.id == sphere.maxParent.id){
             if(entitySystem.getEntityFromShape(contact.body1)?.isHealthUnit){
-                sphere.toBeRemoved = true;
+                //sphere.toBeRemoved = true;
+                top.stopped = true;
                 entitySystem.getEntityFromShape(contact.body1).health -= 10;
                 return;
             }
@@ -354,10 +359,10 @@ setInterval(function () {
 
 var s = slimeSpawner.spawnSlime(Slime, world, graphicsEngine);
 s.getMainShape().global.body.setPosition(s.getMainShape().global.body.position.add(new Vector3(-50, 0, -50)));
-targets.unshift(new Target({
-    followID: s.id,
-    threatLevel: Infinity
-}))
+// targets.unshift(new Target({
+//     followID: s.id,
+//     threatLevel: Infinity
+// }))
 slimes.push(s);
 top.s = s;
 for (var i = 0; i < 1; i++) {

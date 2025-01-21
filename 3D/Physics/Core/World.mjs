@@ -55,6 +55,12 @@ var World = class {
     }
 
     step() {
+        if(top.stopped){
+            setTimeout(function(){
+                //top.stopped = false;
+            }, 1000);
+            //return;
+        }
         for (var i in this.all) {
             this.all[i].dispatchEvent("preStep");
         }

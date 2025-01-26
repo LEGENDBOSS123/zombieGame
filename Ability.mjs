@@ -59,7 +59,11 @@ var Ability = class {
         container.style.height = "100%";
         container.style.position = 'absolute';
         container.style.bottom = "0";
-        container.style.textContent = this.name;
+        container.textContent = this.name;
+        container.style.display = "flex";
+        container.style.alignItems = "center";
+        container.style.justifyContent = "center";
+        
         this.html = container;
         return container;
     }

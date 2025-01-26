@@ -172,7 +172,8 @@ entitySystem.register(player);
 var ability1 = new Ability({
     document: document,
     graphicsEngine: graphicsEngine,
-    world: world
+    world: world,
+    name: "Mini Slime"
 });
 ability1.onActivate = function (timeHeld) {
     var intersection = graphicsEngine.raycastFirst();
@@ -221,7 +222,8 @@ hotbar.addAbility(ability1, 1);
 var ability2 = new Ability({
     document: document,
     graphicsEngine: graphicsEngine,
-    world: world
+    world: world,
+    name: "Big Slime"
 });
 ability2.onActivate = function (timeHeld) {
     var intersection = graphicsEngine.raycastFirst();
@@ -262,7 +264,8 @@ var ability3 = new Ability({
     document: document,
     graphicsEngine: graphicsEngine,
     world: world,
-    reloadTime: 0
+    reloadTime: 300,
+    name: "Bullets"
 });
 ability3.onActivate = function (timeHeld) {
     var intersection = graphicsEngine.raycastFirst();

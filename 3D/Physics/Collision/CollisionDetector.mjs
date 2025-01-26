@@ -376,80 +376,18 @@ var CollisionDetector = class {
         this.addContact(contact);
         return true;
     }
-    timeOfCollisionSphereSphere(p1, v1, r1, p2, v2, r2) {
-        // p1, p2: Position vectors of the spheres (objects with x, y, z properties)
-        // v1, v2: Velocity vectors of the spheres (objects with x, y, z properties)
-        // r1, r2: Radii of the spheres
-
-        // Relative position and velocity
-        const dp = {
-            x: p1.x - p2.x,
-            y: p1.y - p2.y,
-            z: p1.z - p2.z,
-        };
-
-        const dv = {
-            x: v1.x - v2.x,
-            y: v1.y - v2.y,
-            z: v1.z - v2.z,
-        };
-
-        // Coefficients of the quadratic equation at^2 + bt + c = 0
-        const a = dv.x * dv.x + dv.y * dv.y + dv.z * dv.z;
-        const b = 2 * (dp.x * dv.x + dp.y * dv.y + dp.z * dv.z);
-        const c = dp.x * dp.x + dp.y * dp.y + dp.z * dp.z - (r1 + r2) * (r1 + r2);
-
-        // Discriminant
-        const discriminant = b * b - 4 * a * c;
-
-        if (discriminant < 0) {
-            // No collision
-            return null;
-        } else {
-            // Calculate the two possible times of collision
-            const t1 = (-b - Math.sqrt(discriminant)) / (2 * a);
-            const t2 = (-b + Math.sqrt(discriminant)) / (2 * a);
-
-            // Return the smallest positive time of collision. If both are negative or t1 is negative and t2 is positive, return the positive one.
-            if (t1 >= 0 && t2 >= 0) {
-                return Math.min(t1, t2);
-            } else if (t1 >= 0) {
-                return t1;
-            } else if (t2 >= 0) {
-                return t2;
-            } else {
-                return null; // Both are negative, collision in the past.
-            }
-        }
-    }
-
-
-
 
     handleSphereSphere(sphere1, sphere2) {
-        var time = this.timeOfCollisionSphereSphere(sphere1.global.body.position, sphere1.global.body.getVelocity(), sphere1.radius, sphere2.global.body.position, sphere2.global.body.getVelocity(), sphere2.radius);
+
         var minT = 0;
         var maxT = 1;
-        var binarySearch = function (t, getData = false) {
-            var sphere1Pos = sphere1.global.body.previousPosition.lerp(sphere1.global.body.position, t);
-            var sphere2Pos = sphere2.global.body.previousPosition.lerp(sphere2.global.body.position, t);
-            var distanceSquared = sphere1Pos.subtract(sphere2Pos).magnitudeSquared();
-            if (getData) {
-                if (distanceSquared < sphere1.radius * sphere1.radius) {
-                    return null;
-                }
-                var contact = new Contact();
-                contact.normal = sphere1Pos.subtract(sphere2Pos).normalizeInPlace();
-                if (contact.normal.magnitudeSquared() == 0) {
-                    contact.normal = new Vector3(1, 0, 0);
-                }
-                contact.point = sphere1.global.body.position.add(sphere2.global.body.position).scale(0.5);
-                contact.velocity = sphere1.getVelocityAtPosition(contact.point).subtractInPlace(sphere2.getVelocityAtPosition(contact.point));
-                contact.body1 = sphere1;
-                contact.body2 = sphere2;
-                contact.penetration = contact.normal.scale(sphere1.radius + sphere2.radius - Math.sqrt(distanceSquared));
-                return contact;
-            }
+        var sphere1Pos = null;
+        var sphere2Pos = null;
+        var distanceSquared = null;
+        var binarySearch = function (t) {
+            sphere1Pos = sphere1.global.body.actualPreviousPosition.lerp(sphere1.global.body.position, t);
+            sphere2Pos = sphere2.global.body.actualPreviousPosition.lerp(sphere2.global.body.position, t);
+            distanceSquared = sphere1Pos.subtract(sphere2Pos).magnitudeSquared();
             return Math.sqrt(distanceSquared) - (sphere1.radius + sphere2.radius);
         }.bind(this);
         var t = 1;
@@ -463,29 +401,30 @@ var CollisionDetector = class {
             }
         }
 
-        t = maxT;
-        //console.log(t, time);
+        t = maxT
+
+
         var isColliding = binarySearch(t) < 0;
+
         if (!isColliding) {
             return false;
         }
         var distanceTo = sphere1.global.body.position.distance(sphere2.global.body.position);
 
         var contact = new Contact();
-        contact.normal = sphere1.global.body.position.subtract(sphere2.global.body.position).normalizeInPlace();
+        contact.normal = sphere1Pos.subtract(sphere2Pos).normalizeInPlace();
         if (contact.normal.magnitudeSquared() == 0) {
             contact.normal = new Vector3(1, 0, 0);
         }
         contact.point = sphere1.global.body.position.add(sphere2.global.body.position).scale(0.5);
         contact.velocity = sphere1.getVelocityAtPosition(contact.point).subtractInPlace(sphere2.getVelocityAtPosition(contact.point));
 
-
         contact.body1 = sphere1;
         contact.body2 = sphere2;
-        contact.penetration = contact.normal.scale(sphere1.radius + sphere2.radius - distanceTo);
-        if (contact.penetration <= 0) {
-            return false;
-        }
+        var penetration = sphere1.radius + sphere2.radius - distanceTo
+
+        contact.penetration = contact.normal.scale(penetration);
+
         this.addContact(contact);
         return;
     }

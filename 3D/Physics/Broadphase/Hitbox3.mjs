@@ -17,6 +17,13 @@ var Hitbox3 = class {
         return this.min.equals(h2.min) && this.max.equals(h2.max);
     }
 
+    extend(v){
+        var hitbox = new this.constructor();
+        hitbox.min = this.min.subtract(v)
+        hitbox.max = this.max.add(v);
+        return hitbox;
+    }
+
     expandToFitPoint(v) {
         this.min.x = Math.min(this.min.x, v.x);
         this.min.y = Math.min(this.min.y, v.y);

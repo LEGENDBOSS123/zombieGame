@@ -270,7 +270,7 @@ ability3.onActivate = function (timeHeld) {
         return;
     }
     // var radius = intersection.distance / 20;
-    var radius = 0.75;
+    var radius = 0.5;
     var point = Vector3.from(intersection.point);
     var normal = Vector3.from(intersection.face.normal);
     point.addInPlace(normal.scale(radius));
@@ -298,29 +298,27 @@ ability3.onActivate = function (timeHeld) {
     if (addition.dot(direction) < 0) {
         addition = new Vector3(0, 0, 0);
     }
-    sphere.global.body.setVelocity(direction.scale(1).add(addition));
+    sphere.global.body.setVelocity(direction.scale(2).add(addition));
     sphere.setRestitution(-100);
     sphere.setFriction(0);
     sphere.addToWorld(this.world);
     sphere.addEventListener("postCollision", function (contact) {
-        if(contact.body1.maxParent.id == sphere.maxParent.id){
-            if(entitySystem.getEntityFromShape(contact.body2)?.isHealthUnit){
+        if (contact.body1.maxParent.id == sphere.maxParent.id) {
+            if (entitySystem.getEntityFromShape(contact.body2)?.isHealthUnit) {
                 //sphere.toBeRemoved = true;
-                top.stopped = true;
                 entitySystem.getEntityFromShape(contact.body2).health -= 10;
                 return;
             }
         }
-        if(contact.body2.maxParent.id == sphere.maxParent.id){
-            if(entitySystem.getEntityFromShape(contact.body1)?.isHealthUnit){
+        if (contact.body2.maxParent.id == sphere.maxParent.id) {
+            if (entitySystem.getEntityFromShape(contact.body1)?.isHealthUnit) {
                 //sphere.toBeRemoved = true;
-                top.stopped = true;
                 entitySystem.getEntityFromShape(contact.body1).health -= 10;
                 return;
             }
         }
-        
-        
+
+
     });
     sphere.collisionMask = 0;
     sphere.collisionMask = sphere.setBitMask(sphere.collisionMask, "B", true);
@@ -332,11 +330,19 @@ hotbar.addAbility(ability3);
 
 
 
+
+
+
+
+
+
+
+
 var slimeSpawner = new SlimeSpawner({
     sphere: {
         global: {
             body: {
-                position: new Vector3(40, 6.3, 0)
+                position: new Vector3(40, -6.3, 0)
             }
         }
     }
@@ -349,8 +355,9 @@ for (var i = 0; i < 1; i++) {
     slimes.push(slimeSpawner.spawnSlime(Slime, world, graphicsEngine));
 }
 
-setInterval(function () {
-    if (slimes.length > 3) {
+var interv = setInterval(function () {
+    
+    if (slimes.length > 1) {
         return;
     }
     slimes.push(slimeSpawner.spawnSlime(Slime, world, graphicsEngine));

@@ -31,6 +31,8 @@ import Slime from "./Slime.mjs";
 import Ability from "./Ability.mjs";
 import Hotbar from "./Hotbar.mjs";
 import EntitySystem from "./EntitySystem.mjs";
+import Timer from "./Timer.mjs";
+
 top.Ability = Ability;
 top.Box = Box;
 top.World = World;
@@ -164,10 +166,10 @@ player.setMeshAndAddToScene({}, graphicsEngine);
 player.addToWorld(world);
 entitySystem.register(player);
 
-// targets.push(new Target({
-//     followID: player.id,
-//     threatLevel: Infinity
-// }))
+targets.push(new Target({
+    followID: player.id,
+    threatLevel: Infinity
+}))
 
 var ability1 = new Ability({
     document: document,
@@ -434,7 +436,12 @@ for (var i = 0; i < 1; i++) {
 var start = performance.now();
 var fps = 20;
 var steps = 0;
+var timeAccumulated = 0;
 var previousWorld = 0;
+
+var timer = new Timer();
+var stepper = new Timer.Interval(1000/fps);
+timer.schedule(stepper);
 function render() {
     //stats.begin();
 
@@ -468,12 +475,9 @@ function render() {
         slime.updateHealthTexture(slime.sphere.mesh, graphicsEngine);
     }
     cameraControls.updateZoom();
-    var now = performance.now();
-    var delta = (now - start) / 1000;
-    var steps2 = delta * fps;
 
-    for (var i = 0; i < Math.floor(steps2 - steps); i++) {
-
+    
+    stepper.job = function(){
         if (player.composite.global.body.position.y < -30) {
             player.respawn();
         }
@@ -502,7 +506,11 @@ function render() {
 
 
     }
-    var lerpAmount = (delta * fps - steps);
+
+    timer.step();
+
+
+    var lerpAmount = stepper.getLerpAmount();
 
 
 

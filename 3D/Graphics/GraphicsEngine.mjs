@@ -79,8 +79,11 @@ var GraphicsEngine = class {
     raycastFirst() {
         this.raycaster.setFromCamera(this.mousePosition, this.camera);
         var intesections = this.raycaster.intersectObjects(this.scene.children, true);
-        if (intesections.length > 0) {
-            return intesections[0];
+        for(var i of intesections){
+            if(i.face == null && !i.normal){
+                continue;
+            }
+            return i;
         }
         return null;
     }

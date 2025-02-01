@@ -32,6 +32,8 @@ import Ability from "./Ability.mjs";
 import Hotbar from "./Hotbar.mjs";
 import EntitySystem from "./EntitySystem.mjs";
 import Timer from "./Timer.mjs";
+import ParticleSystem from "./ParticleSystem.mjs";
+import Particle from "./Particle.mjs";
 
 top.Ability = Ability;
 top.Box = Box;
@@ -288,7 +290,7 @@ ability3.onActivate = function (timeHeld) {
         },
         local: {
             body: {
-                mass: 1
+                mass: 0.3
             }
         },
         width: radius,
@@ -308,17 +310,23 @@ ability3.onActivate = function (timeHeld) {
     sphere.setFriction(0);
     sphere.addToWorld(this.world);
     sphere.addEventListener("postCollision", function (contact) {
+        if(sphere.toBeRemoved){
+            return;
+        }
+        var dmg = Math.floor(Math.random() * 30) + 10;
         if (contact.body1.maxParent.id == sphere.maxParent.id) {
             if (entitySystem.getEntityFromShape(contact.body2)?.isHealthUnit) {
-                //sphere.toBeRemoved = true;
-                entitySystem.getEntityFromShape(contact.body2).health -= 10;
+                sphere.toBeRemoved = true;
+                addParticle(contact.body2.global.body.position.copy(), dmg);
+                entitySystem.getEntityFromShape(contact.body2).health -= dmg;
                 return;
             }
         }
         if (contact.body2.maxParent.id == sphere.maxParent.id) {
             if (entitySystem.getEntityFromShape(contact.body1)?.isHealthUnit) {
-                //sphere.toBeRemoved = true;
-                entitySystem.getEntityFromShape(contact.body1).health -= 10;
+                sphere.toBeRemoved = true;
+                addParticle(contact.body1.global.body.position.copy(), dmg);
+                entitySystem.getEntityFromShape(contact.body1).health -= dmg;
                 return;
             }
         }
@@ -338,9 +346,24 @@ hotbar.addAbility(ability3);
 
 
 
+var addParticle = function (position, damage) {
+    var particle = new Particle({
+        position: position.add(new Vector3(0, 3, 0)),
+        duration: 750,
+        swaySpeed: 0.01,
+        size: Math.max(-0.5 + damage * 0.1, 0.5),
+        swayStrength: -0.1 + damage * 0.01,
+        text: "-" + damage.toString(),
+        color: "rgb(158, 36, 21)",
+        velocity: new Vector3(0, 0.006, 0),
+        damping: 0.005,
+        fadeOut: true,
+        fadeOutSpeed: 0.5
+    });
+    particleSystem.addParticle(particle);
+}
 
-
-
+top.addParticle = addParticle;
 
 
 var slimeSpawner = new SlimeSpawner({
@@ -361,7 +384,7 @@ for (var i = 0; i < 1; i++) {
 }
 
 var interv = setInterval(function () {
-    
+
     if (slimes.length > 1) {
         return;
     }
@@ -440,8 +463,12 @@ var timeAccumulated = 0;
 var previousWorld = 0;
 
 var timer = new Timer();
-var stepper = new Timer.Interval(1000/fps);
+var stepper = new Timer.Interval(1000 / fps);
 timer.schedule(stepper);
+var particleSystem = new ParticleSystem({
+    timer: timer,
+    graphicsEngine: graphicsEngine
+})
 function render() {
     //stats.begin();
 
@@ -476,8 +503,8 @@ function render() {
     }
     cameraControls.updateZoom();
 
-    
-    stepper.job = function(){
+
+    stepper.job = function () {
         if (player.composite.global.body.position.y < -30) {
             player.respawn();
         }
@@ -507,7 +534,7 @@ function render() {
 
     }
 
-    timer.step();
+
 
 
     var lerpAmount = stepper.getLerpAmount();
@@ -517,7 +544,9 @@ function render() {
     graphicsEngine.update(previousWorld || world, world, lerpAmount);
 
     gameCamera.update(Vector3.from(player.getMainShape()?.mesh?.mesh?.position));
+    particleSystem.update();
     graphicsEngine.render();
+    timer.step();
     requestAnimationFrame(render);
 
     //stats.end();

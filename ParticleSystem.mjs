@@ -1,0 +1,31 @@
+var ParticleSystem = class {
+    constructor(options){
+        this.particles = new Set();
+        this.timer = options?.timer ?? null;
+        this.graphicsEngine = options?.graphicsEngine ?? null;
+    }
+
+    addParticle(particle){
+        particle.startTime = this.timer.getTime();
+        particle.setMeshAndAddToScene(null, this.graphicsEngine);
+        this.particles.add(particle);
+    }
+
+    removeParticle(particle){
+        this.particles.delete(particle);
+    }
+
+    update(){
+        for(var p of this.particles){
+            var dt = this.timer.getTime() - p.startTime;
+            if(dt > p.duration){
+                p.removed();
+                this.removeParticle(p);
+                continue;
+            }
+            p.update(this.timer.getTime() - p.startTime);
+        }
+    }
+}
+
+export default ParticleSystem;

@@ -35,7 +35,9 @@ var Slime = class extends HealthEntity {
                 return;
             }
             var e = targetEntity;
-            e.health--;
+            var damage = Math.floor(Math.random() * 5) + 1
+            e.health -= damage;
+            top.addParticle(targetBody.global.body.position, damage);
         }.bind(this);
         this.spherePostCollision = function (contact) {
             var targetShapeID = this.entitySystem.getByID(this.target?.followID)?.getMainShape()?.id;

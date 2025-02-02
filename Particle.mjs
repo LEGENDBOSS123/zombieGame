@@ -8,8 +8,10 @@ var Particle = class {
         this.damping = options?.damping ?? 0;
         this.acceleration = options?.acceleration ?? new Vector3();
         this.duration = options?.duration ?? 0;
-        this.fadeOut = options?.fadeOut ?? false;
-        this.fadeOutSpeed = options?.fadeOutSpeed ?? 0.25;
+        this.fadeOutSpeed = options?.fadeOutSpeed ?? 0;
+        this.fadeInSpeed = options?.fadeInSpeed ?? 0;
+        this.shrinkSpeed = options?.shrinkSpeed ?? 0;
+        this.growthSpeed = options?.growthSpeed ?? 0;
         this.startTime = null;
         this.size = options?.size ?? 10;
         this.text = options?.text ?? "";
@@ -24,25 +26,29 @@ var Particle = class {
         this.spriteMaterial = null;
         this.sprite = null;
         this.scene = null;
+        this.createdText = false;
     }
 
     createCanvasTexture() {
         this.canvas.canvas = document.createElement('canvas');
         this.canvas.ctx = this.canvas.canvas.getContext('2d');
-        this.canvas.canvas.width = 128;
-        this.canvas.canvas.height = 64;
+        this.canvas.canvas.width = 64;
+        this.canvas.canvas.height = 48;
 
         return new THREE.CanvasTexture(this.canvas.canvas);
     }
 
     updateCanvas(time) {
+        if(this.createdText){
+            return;
+        }
         var canvas = this.canvas.canvas;
         var ctx = this.canvas.ctx;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         // ctx.fillStyle = "black";
         // ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = this.color;
-        ctx.font = '50px Arial';
+        ctx.font = '32px Arial';
         ctx.lineWidth = 2;
         ctx.strokeStyle = this.color;
         ctx.textAlign = 'center';
@@ -51,6 +57,7 @@ var Particle = class {
         ctx.fillText(this.text, canvas.width / 2, canvas.height / 2);
 
         this.texture.needsUpdate = true;
+        this.createdText = true;
     }
 
     setMeshAndAddToScene(options, graphicsEngine) {
@@ -92,17 +99,29 @@ var Particle = class {
         var position = this.position.add(dampedVelocity).addInPlace(this.acceleration.scale(time * time * 0.5));
         var sway = this.swayStrength * Math.sin(time * this.swaySpeed);
         this.updateCanvas(time);
-        this.sprite.position.set(position.x, position.y, position.z);
-        this.sprite.material.rotation = sway;
-        this.sprite.scale.set(this.canvas.canvas.width / this.canvas.canvas.height * this.size, this.size, 1);
-        if(this.fadeOut && this.fadeOutSpeed > 0){
+        if(this.fadeOutSpeed > 0 || this.fadeInSpeed > 0) {
             var ratio = Math.max(0, Math.min(1, time / this.duration));
             var opacity = 1;
-            if(ratio > 1 - this.fadeOutSpeed){
-                opacity = 1 - (ratio - 1 + this.fadeOutSpeed)/this.fadeOutSpeed;
+            if (ratio < this.fadeInSpeed) {
+                opacity = ratio / this.fadeInSpeed;
+            } else if (ratio > 1 - this.fadeOutSpeed) {
+                opacity = 1 - (ratio - 1 + this.fadeOutSpeed) / this.fadeOutSpeed;
             }
             this.spriteMaterial.opacity = opacity;
         }
+        var size = 1;
+        if(this.shrinkSpeed > 0 || this.growthSpeed > 0) {
+            var ratio = Math.max(0, Math.min(1, time / this.duration));
+            if (ratio < this.growthSpeed) {
+                size = ratio / this.growthSpeed;
+            } else if (ratio > 1 - this.shrinkSpeed) {
+                size = 1 - (ratio - 1 + this.shrinkSpeed) / this.shrinkSpeed;
+            }
+        }
+        this.sprite.position.set(position.x, position.y, position.z);
+        this.sprite.material.rotation = sway;
+        this.sprite.scale.set(this.canvas.canvas.width / this.canvas.canvas.height * this.size * size, this.size * size, 1);
+        
     }
 }
 

@@ -3,9 +3,13 @@ var ParticleSystem = class {
         this.particles = new Set();
         this.timer = options?.timer ?? null;
         this.graphicsEngine = options?.graphicsEngine ?? null;
+        this.maxParticles = options?.maxParticles ?? 256
     }
 
     addParticle(particle){
+        if(this.particles.size > this.maxParticles){
+            return;
+        }
         particle.startTime = this.timer.getTime();
         particle.setMeshAndAddToScene(null, this.graphicsEngine);
         this.particles.add(particle);

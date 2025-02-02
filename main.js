@@ -349,16 +349,18 @@ hotbar.addAbility(ability3);
 var addParticle = function (position, damage) {
     var particle = new Particle({
         position: position.add(new Vector3(0, 3, 0)),
-        duration: 750,
+        duration: 1250,
         swaySpeed: 0.01,
-        size: Math.max(-0.5 + damage * 0.1, 0.5),
+        size: Math.max(-0.25 + damage * 0.1, 0.5),
         swayStrength: -0.1 + damage * 0.01,
         text: "-" + damage.toString(),
-        color: "rgb(158, 36, 21)",
+        color: "rgb(200, 36, 21)",
         velocity: new Vector3(0, 0.006, 0),
         damping: 0.005,
-        fadeOut: true,
-        fadeOutSpeed: 0.5
+        fadeOutSpeed: 0.2,
+        fadeInSpeed: 0.2,
+        growthSpeed: 0.2,
+        shrinkSpeed: 0.2,
     });
     particleSystem.addParticle(particle);
 }
@@ -469,6 +471,7 @@ var particleSystem = new ParticleSystem({
     timer: timer,
     graphicsEngine: graphicsEngine
 })
+top.particleSystem = particleSystem;
 function render() {
     //stats.begin();
 

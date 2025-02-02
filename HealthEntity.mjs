@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import Entity from "./Entity.mjs";
 
-var HealthUnit = class extends Entity {
+var HealthEntity = class extends Entity {
     constructor(options) {
         super(options);
         this.maxHealth = options?.maxHealth ?? 100;
@@ -13,19 +13,25 @@ var HealthUnit = class extends Entity {
         if (!model?.mesh?.healthInfo) {
             return;
         }
+        var ratio = this.health / this.maxHealth;
+        
         model = model.mesh;
+        if(ratio == model.healthInfo.healthRatio) {
+            return;
+        }
         var healthCanvas = model.healthInfo.canvas;
         var ctx = model.healthInfo.context;
 
         var texture = model.healthInfo.texture;
-        var sprite = model.healthInfo.sprite;
         ctx.clearRect(0, 0, healthCanvas.width, healthCanvas.height);
 
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, healthCanvas.width, healthCanvas.height);
 
         ctx.fillStyle = "green";
-        ctx.fillRect(0, 0, healthCanvas.width * this.health / this.maxHealth, healthCanvas.height);
+        
+        ctx.fillRect(0, 0, healthCanvas.width * ratio, healthCanvas.height);
+        model.healthInfo.healthRatio = ratio;
         texture.needsUpdate = true;
     }
 
@@ -35,8 +41,8 @@ var HealthUnit = class extends Entity {
         }
         model = model.mesh;
         var canv = document.createElement("canvas");
-        canv.width = 100;
-        canv.height = 100;
+        canv.width = 64;
+        canv.height = 32;
         var ctx = canv.getContext("2d");
 
         var texture = new THREE.CanvasTexture(canv);
@@ -51,7 +57,8 @@ var HealthUnit = class extends Entity {
             canvas: canv,
             context: ctx,
             sprite: sprite,
-            texture: texture
+            texture: texture,
+            healthRatio: null
         }
         sprite.scale.set(...scale);
         sprite.position.set(...position);
@@ -72,4 +79,4 @@ var HealthUnit = class extends Entity {
 }
 
 
-export default HealthUnit;
+export default HealthEntity;

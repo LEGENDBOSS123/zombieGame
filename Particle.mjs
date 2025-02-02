@@ -30,7 +30,7 @@ var Particle = class {
     }
 
     createCanvasTexture() {
-        this.canvas.canvas = document.createElement('canvas');
+        this.canvas.canvas = new OffscreenCanvas(0,0);
         this.canvas.ctx = this.canvas.canvas.getContext('2d');
         this.canvas.canvas.width = 64;
         this.canvas.canvas.height = 48;
@@ -55,7 +55,6 @@ var Particle = class {
         ctx.textBaseline = 'middle';
         ctx.strokeText(this.text, canvas.width / 2, canvas.height / 2);
         ctx.fillText(this.text, canvas.width / 2, canvas.height / 2);
-
         this.texture.needsUpdate = true;
         this.createdText = true;
     }
@@ -80,7 +79,6 @@ var Particle = class {
         this.spriteMaterial = null;
         this.sprite = null;
         this.scene = null;
-        this.canvas.canvas.remove();
         this.canvas = {
             ctx: null,
             canvas: null

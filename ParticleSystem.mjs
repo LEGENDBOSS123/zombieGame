@@ -3,7 +3,7 @@ var ParticleSystem = class {
         this.particles = new Set();
         this.timer = options?.timer ?? null;
         this.graphicsEngine = options?.graphicsEngine ?? null;
-        this.maxParticles = options?.maxParticles ?? 256
+        this.maxParticles = options?.maxParticles ?? 64;
     }
 
     addParticle(particle){

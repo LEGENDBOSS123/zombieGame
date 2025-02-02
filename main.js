@@ -66,8 +66,8 @@ graphicsEngine.setBackgroundImage("3D/Graphics/Textures/autumn_field_puresky_8k.
 
 graphicsEngine.setSunlightDirection(new Vector3(-2, -8, -5));
 graphicsEngine.setSunlightBrightness(1);
-graphicsEngine.disableAO();
-graphicsEngine.disableShadows();
+// graphicsEngine.disableAO();
+// graphicsEngine.disableShadows();
 
 
 graphicsEngine.renderDistance = 1024;
@@ -316,7 +316,7 @@ ability3.onActivate = function (timeHeld) {
         var dmg = Math.floor(Math.random() * 30) + 10;
         if (contact.body1.maxParent.id == sphere.maxParent.id) {
             if (entitySystem.getEntityFromShape(contact.body2)?.isHealthUnit) {
-                sphere.toBeRemoved = true;
+                // sphere.toBeRemoved = true;
                 addParticle(contact.body2.global.body.position.copy(), dmg);
                 entitySystem.getEntityFromShape(contact.body2).health -= dmg;
                 return;
@@ -324,7 +324,7 @@ ability3.onActivate = function (timeHeld) {
         }
         if (contact.body2.maxParent.id == sphere.maxParent.id) {
             if (entitySystem.getEntityFromShape(contact.body1)?.isHealthUnit) {
-                sphere.toBeRemoved = true;
+                // sphere.toBeRemoved = true;
                 addParticle(contact.body1.global.body.position.copy(), dmg);
                 entitySystem.getEntityFromShape(contact.body1).health -= dmg;
                 return;
@@ -473,7 +473,7 @@ var particleSystem = new ParticleSystem({
 })
 top.particleSystem = particleSystem;
 function render() {
-    //stats.begin();
+    stats.begin();
 
     if (keyListener.isHeld("ArrowUp") || keyListener.isHeld("KeyW")) {
         cameraControls.forward();
@@ -515,10 +515,10 @@ function render() {
         for (var slime of slimes) {
             slime.update(targets, world);
         }
-        stats.begin();
+        // stats.begin();
         world.step();
 
-        stats.end();
+        // stats.end();
         steps++;
 
         if (cameraControls.movement.up && player.canJump) {
@@ -552,7 +552,7 @@ function render() {
     timer.step();
     requestAnimationFrame(render);
 
-    //stats.end();
+    stats.end();
 }
 
 

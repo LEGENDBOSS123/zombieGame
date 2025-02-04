@@ -430,54 +430,99 @@ var CollisionDetector = class {
     }
 
     handleSphereTerrain(sphere1, terrain1) {
-        var spherePos = sphere1.global.body.position;
-
-        var translatedSpherePos = terrain1.translateWorldToLocal(spherePos);
-        var heightmapPos = terrain1.translateLocalToHeightmap(translatedSpherePos);
         var heightmapSphereWidth = sphere1.radius * terrain1.inverseTerrainScale;
+        var spherePos = null;
+        var terrainPos = null;
+        var relativePos = null;
+        var heightmapPos = null;
+        var min = null;
+        var max = null;
+        var binarySearch = function (t, getData = false) {
+            spherePos = sphere1.global.body.previousPosition.lerp(sphere1.global.body.position, t);
+            terrainPos = terrain1.global.body.previousPosition.lerp(terrain1.global.body.position, t);
+            relativePos = terrain1.global.body.rotation.conjugate().multiplyVector3(spherePos.subtract(terrainPos));
+            heightmapPos = terrain1.translateLocalToHeightmap(relativePos);
+            if (heightmapPos.x <= -heightmapSphereWidth || heightmapPos.x >= terrain1.heightmaps.widthSegments + heightmapSphereWidth || heightmapPos.z <= -heightmapSphereWidth || heightmapPos.z >= terrain1.heightmaps.depthSegments + heightmapSphereWidth) {
+                return 1;
+            }
+            var currentHeight = 0;
+            var currentTriangle = terrain1.getTriangle(terrain1.heightmaps.top, heightmapPos);
+            if (currentTriangle) {
+                var currentHeight = relativePos.y - currentTriangle.getHeight(heightmapPos).y;
+                if (currentHeight < sphere1.radius) {
+                    return currentHeight - sphere1.radius;
+                }
+            }
 
-        if (heightmapPos.x <= -heightmapSphereWidth || heightmapPos.x >= terrain1.heightmaps.widthSegments + heightmapSphereWidth || heightmapPos.z <= -heightmapSphereWidth || heightmapPos.z >= terrain1.heightmaps.depthSegments + heightmapSphereWidth) {
-            return false;
+            return 1;
+        }
+        var minT = 0;
+        var maxT = 1;
+        var t = 1;
+        for (var i = 0; i < this.binarySearchDepth; i++) {
+            t = (minT + maxT) / 2;
+            var result = binarySearch(t);
+            if (result > 0) {
+                minT = t;
+            } else {
+                maxT = t;
+            }
+        }
+        t = maxT;
+        binarySearch(t);
+
+        var currentHeight = 0;
+        var currentTriangle = terrain1.getTriangle(terrain1.heightmaps.top, heightmapPos);
+        if (currentTriangle) {
+            var currentHeight = relativePos.y - currentTriangle.getHeight(heightmapPos).y;
+            if (currentHeight < 0) {
+                currentTriangle.a = terrain1.translateHeightmapToWorld(currentTriangle.a);
+                currentTriangle.b = terrain1.translateHeightmapToWorld(currentTriangle.b);
+                currentTriangle.c = terrain1.translateHeightmapToWorld(currentTriangle.c);
+                var normal = currentTriangle.getNormal();
+                var spherePos2 = sphere1.global.body.position;
+                var intersection = currentTriangle.intersectsSphere(spherePos2);
+                if (intersection) {
+                    var contact = new Contact();
+                    contact.point = intersection;
+                    contact.normal = normal;
+                    contact.penetration = intersection.subtract(spherePos2);
+                    contact.body1 = sphere1;
+                    contact.body2 = terrain1;
+
+                    contact.velocity = sphere1.getVelocityAtPosition(contact.point).subtractInPlace(terrain1.getVelocityAtPosition(contact.point));
+
+                    this.addContact(contact);
+                }
+            }
         }
 
-        var min = new Vector3(heightmapPos.x - heightmapSphereWidth, 0, heightmapPos.z - heightmapSphereWidth);
-        var max = new Vector3(heightmapPos.x + heightmapSphereWidth, 0, heightmapPos.z + heightmapSphereWidth);
-        var top = [];
-        for (var i = 0; i < 3; i++) {
-            top[i] = [-Infinity, null];
-        }
-        var handled = false;
-        for (var x = min.x - 1; x <= max.x + 1; x++) {
-            for (var z = min.z - 1; z <= max.z + 1; z++) {
+        var min = new Vector3(heightmapPos.x - heightmapSphereWidth - 1, 0, heightmapPos.z - heightmapSphereWidth - 1);
+        var max = new Vector3(heightmapPos.x + heightmapSphereWidth + 1, 0, heightmapPos.z + heightmapSphereWidth + 1);
+
+        for (var x = min.x; x <= max.x; x++) {
+            for (var z = min.z; z <= max.z; z++) {
                 var triangles = terrain1.getTrianglePair(terrain1.heightmaps.top, new Vector3(x, 0, z));
                 if (!triangles) {
                     continue;
                 }
-                for (var triangle of triangles) {
-                    if (!triangle) {
-                        continue;
-                    }
-                    triangle.a = terrain1.translateHeightmapToWorld(triangle.a);
-                    triangle.b = terrain1.translateHeightmapToWorld(triangle.b);
-                    triangle.c = terrain1.translateHeightmapToWorld(triangle.c);
-                    var boundingSphere = triangle.makeBoundingSphere();
-                    if (spherePos.subtract(boundingSphere.center).magnitudeSquared() >= (boundingSphere.radius + sphere1.radius) * (boundingSphere.radius + sphere1.radius)) {
-                        continue;
-                    }
-                    var intersection = triangle.intersectsSphere(spherePos);
+                for (var t of triangles) {
+                    t.a = terrain1.translateHeightmapToWorld(t.a);
+                    t.b = terrain1.translateHeightmapToWorld(t.b);
+                    t.c = terrain1.translateHeightmapToWorld(t.c);
+                    spherePos2 = sphere1.global.body.position;
+                    var intersection = t.intersectsSphere(spherePos2);
                     if (!intersection) {
                         continue;
                     }
                     var contact = new Contact();
                     contact.point = intersection;
-                    contact.penetration = contact.normal.scale(sphere1.radius - contact.point.distance(spherePos));
+                    contact.penetration = sphere1.radius - contact.point.distance(spherePos2);
+                    contact.normal = t.getNormal();//contact.point.subtract(spherePos2).normalizeInPlace();
                     if (contact.penetration <= 0) {
                         continue;
                     }
-                    contact.normal = spherePos.subtract(intersection).normalizeInPlace();
-                    if (contact.normal.dot(triangle.getNormal()) < 0) {
-                        continue;
-                    }
+
                     if (contact.normal.magnitudeSquared() == 0) {
                         contact.normal = new Vector3(1, 0, 0);
                     }
@@ -485,35 +530,11 @@ var CollisionDetector = class {
                     contact.body2 = terrain1;
 
                     contact.velocity = sphere1.getVelocityAtPosition(contact.point).subtractInPlace(terrain1.getVelocityAtPosition(contact.point));
-                    for (var i = 0; i < top.length; i++) {
-                        if (contact.penetration >= top[i][0]) {
-                            top[i][0] = contact.penetration;
-                            if (top[i][1]) {
-                                if (top[i][1].point.equals(contact.point) && top[i][1].normal.equals(contact.normal)) {
-                                    break;
-                                }
-                            }
-                            top[i][1] = contact;
-                            break;
-                        }
-                    }
+                    contact.penetration = contact.normal.scale(contact.penetration);
+                    this.addContact(contact);
                 }
             }
         }
-        var cnt = this.handleTerrainPoint(terrain1, sphere1, true);
-        if (cnt) {
-            cnt.penetration += sphere1.radius / 2;
-            if (cnt.penetration > 0) {
-                this.addContact(cnt);
-            }
-        }
-        for (var i = 0; i < top.length; i++) {
-            if (top[i][1]) {
-                this.addContact(top[i][1]);
-                handled = true;
-            }
-        }
-
     }
 
     handleTerrainPoint(terrain1, point1, manual = false) {
@@ -570,13 +591,15 @@ var CollisionDetector = class {
             var normal = triangle2.getNormal();
             var contact = new Contact();
             contact.normal = normal;
-            contact.penetration = contact.normal.scale(triangle2.a.subtract(pointPos).dot(contact.normal));
+            contact.penetration = triangle2.a.subtract(pointPos).dot(contact.normal);
             if (contact.penetration <= 0 && !manual) {
                 return false;
             }
+            console.log(triangle2.a.subtract(pointPos));
             contact.body1 = point1;
             contact.body2 = terrain1;
             contact.point = point1.global.body.position;
+            contact.penetration = contact.normal.scale(contact.penetration);
             contact.velocity = point1.getVelocityAtPosition(contact.point).subtractInPlace(terrain1.getVelocityAtPosition(contact.point));
             if (!manual) {
                 this.addContact(contact);

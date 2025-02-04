@@ -321,7 +321,10 @@ var Terrain3 = class extends Composite {
         geometry.computeBoundingSphere();
     }
 
-
+    setMeshAndAddToScene(options, graphicsEngine) {
+        this.setMesh(options, graphicsEngine);
+        this.addToScene(graphicsEngine.scene);
+    }
 
     setMesh(options, graphicsEngine) {
         var material = options?.material ?? new graphicsEngine.THREE.MeshPhongMaterial({ color: 0x00ff00 });
@@ -351,7 +354,7 @@ var Terrain3 = class extends Composite {
         leftAttrib.position.needsUpdate = true;
         leftGeo.computeVertexNormals();
         leftGeo.computeBoundingSphere();
-        this.setColorGeometry(leftGeo, graphicsEngine.THREE);
+        this.setColorGeometry(leftGeo, graphicsEngine);
 
         var rightGeo = new graphicsEngine.THREE.PlaneGeometry(this.terrainWidth, 1, this.heightmaps.widthSegments, 1);
         rightGeo.translate(0, 0, this.terrainDepth / 2);
@@ -430,12 +433,12 @@ var Terrain3 = class extends Composite {
         var forwardMesh = new graphicsEngine.THREE.Mesh(forwardGeo, forwardMaterial);
         var backMesh = new graphicsEngine.THREE.Mesh(backGeo, backMaterial);
 
-        this.mesh.add(topMesh);
-        this.mesh.add(botMesh);
-        this.mesh.add(leftMesh);
-        this.mesh.add(rightMesh);
-        this.mesh.add(forwardMesh);
-        this.mesh.add(backMesh);
+        this.mesh.mesh.add(topMesh);
+        this.mesh.mesh.add(botMesh);
+        this.mesh.mesh.add(leftMesh);
+        this.mesh.mesh.add(rightMesh);
+        this.mesh.mesh.add(forwardMesh);
+        this.mesh.mesh.add(backMesh);
     }
 };
 

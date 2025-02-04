@@ -70,8 +70,8 @@ graphicsEngine.setSunlightBrightness(1);
 // graphicsEngine.disableShadows();
 
 
-graphicsEngine.renderDistance = 1024;
-graphicsEngine.cameraFar = 2048;
+graphicsEngine.renderDistance = 2048;
+graphicsEngine.cameraFar = 4096;
 window.graphicsEngine = graphicsEngine;
 
 
@@ -146,13 +146,13 @@ var slimes = [];
 
 var player = new Player({
     radius: 1,
-    moveStrength: new Vector3(0.2, 0.05, 0.2),
+    moveStrength: new Vector3(0.2, 0.05, 0.2).scale(3),
     jumpStrength: 0.75,
     global: {
         body: {
             acceleration: new Vector3(0, gravity, 0),
             position: new Vector3(0, 80, 0),
-            linearDamping: new Vector3(0.05, 0, 0.05),
+            // linearDamping: new Vector3(0.05, 0, 0.05),
             angularDamping: 1
         }
     },
@@ -268,7 +268,7 @@ var ability3 = new Ability({
     document: document,
     graphicsEngine: graphicsEngine,
     world: world,
-    reloadTime: 300,
+    reloadTime: 0,
     name: "Bullets"
 });
 ability3.onActivate = function (timeHeld) {
@@ -276,7 +276,6 @@ ability3.onActivate = function (timeHeld) {
     if (!intersection) {
         return;
     }
-    // var radius = intersection.distance / 20;
     var radius = 0.5;
     var point = Vector3.from(intersection.point);
     var normal = Vector3.from(intersection.face.normal);
@@ -310,7 +309,7 @@ ability3.onActivate = function (timeHeld) {
     sphere.setFriction(0);
     sphere.addToWorld(this.world);
     sphere.addEventListener("postCollision", function (contact) {
-        if(sphere.toBeRemoved){
+        if (sphere.toBeRemoved) {
             return;
         }
         var dmg = Math.floor(Math.random() * 30) + 10;
@@ -380,28 +379,28 @@ var slimeSpawner = new SlimeSpawner({
 slimeSpawner.setMeshAndAddToScene({}, graphicsEngine);
 entitySystem.register(slimeSpawner);
 
-slimeSpawner.addToWorld(world);
-for (var i = 0; i < 1; i++) {
-    slimes.push(slimeSpawner.spawnSlime(Slime, world, graphicsEngine));
-}
+//slimeSpawner.addToWorld(world);
+// for (var i = 0; i < 1; i++) {
+//     slimes.push(slimeSpawner.spawnSlime(Slime, world, graphicsEngine));
+// }
 
 var interv = setInterval(function () {
 
-    if (slimes.length > 1) {
+    if (slimes.length > 0) {
         return;
     }
-    slimes.push(slimeSpawner.spawnSlime(Slime, world, graphicsEngine));
+    //slimes.push(slimeSpawner.spawnSlime(Slime, world, graphicsEngine));
 }, 1);
 
 
-var s = slimeSpawner.spawnSlime(Slime, world, graphicsEngine);
-s.getMainShape().global.body.setPosition(s.getMainShape().global.body.position.add(new Vector3(-50, 0, -50)));
-// targets.unshift(new Target({
-//     followID: s.id,
-//     threatLevel: Infinity
-// }))
-slimes.push(s);
-top.s = s;
+// var s = slimeSpawner.spawnSlime(Slime, world, graphicsEngine);
+// s.getMainShape().global.body.setPosition(s.getMainShape().global.body.position.add(new Vector3(-50, 0, -50)));
+// // targets.unshift(new Target({
+// //     followID: s.id,
+// //     threatLevel: Infinity
+// // }))
+// slimes.push(s);
+// top.s = s;
 for (var i = 0; i < 1; i++) {
     graphicsEngine.load('ground.glb', function (gltf) {
         gltf.scene.castShadow = true;
@@ -453,8 +452,64 @@ for (var i = 0; i < 1; i++) {
 
 }
 
+var topArray = [];
+var bottomArray = [];
+for (var i = 0; i < 10; i++) {
+    var append = [];
+    var append2 = [];
+    for (var j = 0; j < 10; j++) {
+        append.push(i + j * 10);
+        append2.push(Math.sin(i + j) * 20 - 100);
+    }
+    topArray.push(append);
+    bottomArray.push(append2);
+}
+
+// var terrain3 = Terrain3.from2dArrays(topArray, bottomArray);
+// terrain3.setTerrainScale(40);
+// terrain3.global.body.position = new Vector3(0, -100, 0);
+// terrain3.global.body.setVelocity(new Vector3(0,0,0));
+// terrain3.local.body.mass = Infinity;
+// terrain3.setLocalFlag(Composite.FLAGS.STATIC, true);
+// terrain3.setMesh({}, graphicsEngine);
+// terrain3.addToScene(graphicsEngine.scene);
+// world.addComposite(terrain3);
+// top.terrain3 = terrain3;
 
 
+var img = new Image();
+img.src = "h.png"
+// var terrain3 = Terrain3.fromDimensions(512, 512);
+// terrain3.setTerrainScale(20);
+img.onload = function () {
+    console.log(img);
+
+    var width = img.width;
+    var height = img.height;
+    var terrain3 = Terrain3.fromDimensions(width, height);
+    terrain3.setTerrainScale(20);
+    var arr = Terrain3.getArrayFromImage(img, 10);
+    var arr2 = structuredClone(arr).flat();
+    for (var i in arr2) {
+        arr2[i] -= 1000;
+    }
+    var terr = Terrain3.from2dArrays(arr, arr2);
+    terrain3.setMaps(terr.heightmaps.top.map, terr.heightmaps.bottom.map);
+
+    terrain3.global.body.position = new Vector3(0, -1000, 0);
+    terrain3.global.body.setVelocity(new Vector3(0, 0, 0));
+    terrain3.local.body.mass = Infinity;
+    terrain3.setLocalFlag(Composite.FLAGS.STATIC, true);
+   
+    world.addComposite(terrain3);
+    top.terrain3 = terrain3;
+    graphicsEngine.load("c" + ".png", function (txt) {
+        var terrain3Material = new THREE.MeshPhongMaterial({ map: txt, vertexColors: true });
+        terrain3.setMeshAndAddToScene({
+            material: terrain3Material,
+        }, graphicsEngine);
+    });
+}
 
 
 
@@ -509,7 +564,7 @@ function render() {
 
     stepper.job = function () {
         if (player.composite.global.body.position.y < -30) {
-            player.respawn();
+            //player.respawn();
         }
         previousWorld = World.fromJSON(structuredClone(world.toJSON()), graphicsEngine);
         for (var slime of slimes) {
